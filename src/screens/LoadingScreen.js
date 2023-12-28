@@ -9,7 +9,7 @@ export default function LoadingScreen() {
 
 	useEffect(() => {
 		setTimeout(async () => {
-			// sign userin if they have previously logged in
+			// sign user automatically if user is already logged in
 			const user = firebase.getCurrentUser();
 			if (user) {
 				const userInfo = await firebase.getUserInfo(user.uid);
@@ -22,7 +22,7 @@ export default function LoadingScreen() {
 			} else {
 				setUser(state => ({ ...state, isLoggedIn: false }));
 			}
-		}, 1000);
+		}, 500);
 	}, []);
 
 	return (
