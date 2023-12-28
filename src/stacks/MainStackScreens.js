@@ -6,6 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
 import PostScreen from '../screens/PostScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import SearchScreen from '../screens/SearchScreen';
 
 export default MainStackScreens = () => {
 	const MainStack = createBottomTabNavigator();
@@ -21,11 +22,11 @@ export default MainStackScreens = () => {
 				}}
 			/>
 			<MainStack.Screen
-				name="Message"
-				component={MessageScreen}
+				name="Search"
+				component={SearchScreen}
 				options={{
 					tabBarIcon: ({ color, size }) => (
-						<Ionicons name="ios-chatbox" color={color} size={size} />
+						<Ionicons name="ios-search" color={color} size={size} />
 					),
 				}}
 			/>
@@ -35,6 +36,15 @@ export default MainStackScreens = () => {
 				options={{
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="ios-add-circle" color={color} size={size} />
+					),
+				}}
+			/>
+			<MainStack.Screen
+				name="Message"
+				component={MessageScreen}
+				options={{
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="ios-chatbox" color={color} size={size} />
 					),
 				}}
 			/>
