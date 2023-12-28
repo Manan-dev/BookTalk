@@ -5,8 +5,9 @@ import {
 	getAuth,
 	getReactNativePersistence,
 	initializeAuth,
+	signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { doc, getFirestore, setDoc } from 'firebase/firestore';
+import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
 
@@ -42,6 +43,28 @@ const Firebase = {
 			console.log('Error @createUser: ', error.message);
 			return { error };
 		}
+	},
+	getUserInfo: async uid => {
+		try {
+			const user = await getDoc(doc(db, 'users', uid));
+			if (user.exists) {
+				return user.data();
+			}
+		} catch (error) {
+			console.log('Error @getUserInfo: ', error.message);
+		}
+	},
+	signin: async (email, password) => {
+		await signInWithEmailAndPassword(auth, email, password);
+	},
+	logout: async () => {
+		try {
+			await auth.signOut();
+			return true;
+		} catch (error) {
+			console.log('Error @logOut: ', error.message);
+		}
+		return false;
 	},
 };
 

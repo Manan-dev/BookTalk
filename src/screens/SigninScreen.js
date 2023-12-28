@@ -8,11 +8,39 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { FirebaseContext } from '../context/FirebaseContext';
+import { UserContext } from '../context/UserContext';
 
 export default function SigninScreen({ navigation }) {
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
+
+	const firebase = React.useContext(FirebaseContext);
+	const [_, setUser] = React.useContext(UserContext);
+
+	handleSignin = async () => {
+		setLoading(true);
+
+		try {
+			await firebase.signin(email, password);
+
+			const uid = firebase.getCurrentUser().uid;
+
+			const userInfo = await firebase.getUserInfo(uid);
+
+			setUser({
+				username: userInfo.username,
+				email: userInfo.email,
+				uid,
+				isLoggedIn: true,
+			});
+		} catch (error) {
+			alert(error.message);
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	return (
 		<SafeAreaView style={styles.container}>
@@ -45,7 +73,9 @@ export default function SigninScreen({ navigation }) {
 					disabled={true}
 				></Button>
 			) : (
-				<Button buttonStyle={styles.signinButton}>Sign in</Button>
+				<Button buttonStyle={styles.signinButton} onPress={handleSignin}>
+					Sign in
+				</Button>
 			)}
 			<TouchableOpacity
 				style={styles.signup}
