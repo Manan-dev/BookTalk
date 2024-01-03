@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@rneui/themed';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import {
 	ScrollView,
 	StyleSheet,
@@ -20,11 +20,6 @@ import mysteryBooksData from '../data/mysteryBooks.json';
 export default function ProfileScreen() {
 	const [user, setUser] = useContext(UserContext);
 	const firebase = useContext(FirebaseContext);
-	const [data, setData] = useState([]);
-
-	useEffect(() => {
-		setData(booksReadData);
-	}, []);
 
 	handleLogout = async () => {
 		const loggedOut = await firebase.logout();
