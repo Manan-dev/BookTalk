@@ -5,7 +5,7 @@ import { FlatList, StyleSheet, View } from 'react-native';
 const Carousel = ({ carouselData, title }) => {
 	const renderItem = ({ item }) => (
 		<View style={styles.item}>
-			<Text>{item.content}</Text>
+			<Text style={styles.contentTitle}>{item.content}</Text>
 		</View>
 	);
 	return (
@@ -39,8 +39,13 @@ const styles = StyleSheet.create({
 		marginBottom: 10,
 	},
 	item: {
+		maxWidth: 70,
+		minWidth: 70,
 		backgroundColor: '#f9c2ff',
-		padding: 20,
+		padding: 5,
 		marginRight: 10,
+	},
+	contentTitle: {
+		fontSize: 12,
 	},
 });
