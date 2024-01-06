@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 
+import CustomHeader from '../components/CustomHeader';
 import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
 import PostScreen from '../screens/PostScreen';
@@ -10,8 +11,19 @@ import SearchScreen from '../screens/SearchScreen';
 
 export default MainStackScreens = () => {
 	const MainStack = createBottomTabNavigator();
+
 	return (
-		<MainStack.Navigator screenOptions={{ headerShown: false }}>
+		<MainStack.Navigator
+			screenOptions={{
+				header: () => <CustomHeader />,
+				tabBarShowLabel: false,
+				tabBarActiveTintColor: '#161F3D',
+				tabBarInactiveTintColor: '#B8BBC4',
+				tabBarStyle: {
+					backgroundColor: '#fff',
+				},
+			}}
+		>
 			<MainStack.Screen
 				name="Home"
 				component={HomeScreen}
@@ -34,8 +46,8 @@ export default MainStackScreens = () => {
 				name="Post"
 				component={PostScreen}
 				options={{
-					tabBarIcon: ({ color, size }) => (
-						<Ionicons name="ios-add-circle" color={color} size={size} />
+					tabBarIcon: () => (
+						<Ionicons name="ios-add-circle" color="#E9446A" size={52} />
 					),
 				}}
 			/>
