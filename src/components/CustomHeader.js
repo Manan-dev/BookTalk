@@ -29,8 +29,6 @@ export default CustomHeader;
 const styles = StyleSheet.create({
 	container: {
 		backgroundColor: '#fff',
-		borderBottomWidth: 1,
-		borderBottomColor: '#ddd',
 	},
 	logoText: {
 		fontSize: 30,
