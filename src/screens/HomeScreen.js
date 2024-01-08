@@ -1,10 +1,13 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import Feed from '../components/Feed';
+import Stories from '../components/Stories';
 
 export default function Home() {
 	return (
 		<View style={styles.container}>
-			<Text>Home Screen</Text>
+			<Stories />
+			<Feed />
 		</View>
 	);
 }
@@ -12,8 +15,7 @@ export default function Home() {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		paddingTop: 10,
 		backgroundColor: '#fff',
-		alignItems: 'center',
-		justifyContent: 'center',
 	},
 });
