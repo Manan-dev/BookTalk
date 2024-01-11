@@ -8,6 +8,7 @@ import {
 	signInWithEmailAndPassword,
 } from 'firebase/auth';
 import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
 
@@ -16,6 +17,8 @@ const FirebaseContext = createContext();
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
+
+const storage = getStorage(app);
 
 initializeAuth(app, {
 	persistence: getReactNativePersistence(ReactNativeAsyncStorage),
@@ -44,6 +47,46 @@ const Firebase = {
 			return { error };
 		}
 	},
+	uploadProfilePhoto: async uri => {
+		const uid = Firebase.getCurrentUser().uid;
+
+		try {
+			const photo = await Firebase.getBlob(uri);
+
+			const imageRef = ref(storage, `profilePhotos/${uid}/profilePhoto`);
+
+			await uploadBytes(imageRef, photo);
+
+			const url = await getDownloadURL(imageRef);
+
+			await setDoc(
+				doc(db, 'users', uid),
+				{
+					profilePhotoUrl: url,
+				},
+				{ merge: true }
+			);
+
+			return url;
+		} catch (error) {
+			console.log('Error @uploadProfilePhoto: ', error.message);
+		}
+	},
+	getBlob: async uri => {
+		return await new Promise((resolve, reject) => {
+			const xhr = new XMLHttpRequest();
+			xhr.onload = function () {
+				resolve(xhr.response);
+			};
+			xhr.onerror = function () {
+				reject(new TypeError('Network request failed'));
+			};
+			xhr.responseType = 'blob';
+			xhr.open('GET', uri, true);
+			xhr.send(null);
+		});
+	},
+
 	getUserInfo: async uid => {
 		try {
 			const user = await getDoc(doc(db, 'users', uid));
