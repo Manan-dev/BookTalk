@@ -17,6 +17,7 @@ export default function LoadingScreen() {
 					isLoggedIn: true,
 					username: userInfo.username,
 					email: userInfo.email,
+					profilePhotoUrl: userInfo.profilePhotoUrl,
 					uid: user.uid,
 				});
 			} else {
