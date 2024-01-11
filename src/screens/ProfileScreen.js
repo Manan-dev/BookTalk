@@ -1,7 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@rneui/themed';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useContext } from 'react';
+
 import {
+	Image,
+	Platform,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -28,16 +32,48 @@ export default function ProfileScreen() {
 			setUser(state => ({ ...state, isLoggedIn: false }));
 		}
 	};
+
+	addProfilePic = async () => {
+		if (Platform.OS !== 'web') {
+			const { status } =
+				await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+			if (status === 'granted') {
+				const image = await ImagePicker.launchImageLibraryAsync({
+					mediaTypes: ImagePicker.MediaTypeOptions.Images,
+					allowsEditing: true,
+					aspect: [1, 1],
+					quality: 0.5,
+				});
+				if (!image.canceled) {
+					const url = await firebase.uploadProfilePhoto(image.assets[0].uri);
+
+					setUser({
+						...user,
+						profilePhotoUrl: url,
+						isLoggedIn: true,
+					});
+				}
+			}
+		}
+	};
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			<SafeAreaView style={styles.content}>
-				<TouchableOpacity>
-					<Ionicons
-						name="ios-person-circle-outline"
-						size={150}
-						color="black"
-						style={styles.profilePicIcon}
-					/>
+				<TouchableOpacity onPress={addProfilePic}>
+					{user.profilePhotoUrl ? (
+						<Image
+							source={{ uri: user.profilePhotoUrl }}
+							style={styles.selectedProfilePic}
+						/>
+					) : (
+						<Ionicons
+							name="add-circle"
+							size={150}
+							color="#edebeb"
+							style={styles.profilePicIcon}
+						/>
+					)}
 				</TouchableOpacity>
 				<Text style={styles.username}>{user.username}</Text>
 				<View style={styles.ffContainer}>
@@ -89,7 +125,6 @@ const styles = StyleSheet.create({
 	content: {
 		width: '100%',
 		alignItems: 'center',
-		marginTop: 50,
 	},
 	logoutButton: {
 		width: 'auto',
@@ -99,6 +134,11 @@ const styles = StyleSheet.create({
 	profilePicIcon: {
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	selectedProfilePic: {
+		width: 150,
+		height: 150,
+		borderRadius: 150 / 2,
 	},
 	username: {
 		fontSize: 25,
