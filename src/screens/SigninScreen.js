@@ -33,6 +33,7 @@ export default function SigninScreen({ navigation }) {
 				username: userInfo.username,
 				email: userInfo.email,
 				uid,
+				profilePhotoUrl: userInfo.profilePhotoUrl,
 				isLoggedIn: true,
 			});
 		} catch (error) {
