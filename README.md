@@ -33,7 +33,7 @@ BookTalk is a mobile application built with React Native and Expo, designed to p
 1. **Clone the Repository**:
 
    ```bash
-   git clone https://github.com/yourusername/BookTalk.git
+   git clone git@github.com:Manan-dev/BookTalk.git
    cd BookTalk
    ```
 
