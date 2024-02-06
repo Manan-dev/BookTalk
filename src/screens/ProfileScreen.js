@@ -85,11 +85,23 @@ export default function ProfileScreen() {
 						<Text style={styles.count}>437</Text>
 						<Text>Following</Text>
 					</View>
+					<View>
+						<Text style={styles.count}>75</Text>
+						<Text>Books</Text>
+					</View>
+					<View>
+						<Text style={styles.count}>29</Text>
+						<Text>Posts</Text>
+					</View>
+				</View>
+				<View style={styles.profileContainer}>
+					<Button buttonStyle={styles.editProfileButton} title="Edit profile" />
+					<Button buttonStyle={styles.messageButton} title="Message" /> 
 				</View>
 				<TextInput
 					multiline
 					numberOfLines={4}
-					placeholder="Bio..."
+					placeholder="Start typing to write your bio!"
 					style={styles.bio}
 				></TextInput>
 
@@ -99,13 +111,19 @@ export default function ProfileScreen() {
 				<View>
 					<Carousel
 						carouselData={mysteryBooksData}
-						title="Best Mystery Books"
+						title="My Favorite Mystery Books"
 					/>
 				</View>
 				<View>
 					<Carousel
 						carouselData={futureBooksData}
-						title="Books I Want to Read"
+						title="To Be Read"
+					/>
+				</View>
+				<View>
+					<Carousel
+						// carouselData={postsData}
+						title="Posts"
 					/>
 				</View>
 				<Button buttonStyle={styles.logoutButton} onPress={handleLogout}>
@@ -122,9 +140,22 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		alignItems: 'center',
 	},
+	profileContainer: {
+		flexDirection: 'row',
+		paddingHorizontal: 20,
+		alignItems:'flex-end',
+	},
 	content: {
 		width: '100%',
 		alignItems: 'center',
+	},
+	editProfileButton: {
+		width: 'auto',
+		borderRadius: 10,
+	},
+	messageButton: {
+		width: 'auto',
+		borderRadius: 10,
 	},
 	logoutButton: {
 		width: 'auto',
@@ -160,7 +191,8 @@ const styles = StyleSheet.create({
 		minHeight: 90,
 		maxHeight: 90,
 		marginBottom: 20,
-		borderWidth: 1,
+		marginTop: 20,
+		borderWidth: 0,
 		backgroundColor: 'rgba(0,0,0,0.1)',
 	},
 });
