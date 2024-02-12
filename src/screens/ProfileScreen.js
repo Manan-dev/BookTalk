@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 
 import {
+	FlatList,
 	Image,
 	Platform,
 	ScrollView,
@@ -15,15 +16,49 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 import Carousel from '../components/Carousel';
+import Modal from 'react-native-modal';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 import booksReadData from '../data/booksRead.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
+// import postsData from '../data/postsData.json'
 
 export default function ProfileScreen() {
 	const [user, setUser] = useContext(UserContext);
+	const [isModalVisible, setModalVisible] = useState(false);
 	const firebase = useContext(FirebaseContext);
+	
+	const ellipsisClicked = item => {
+		setModalVisible(true);
+	};
+
+	const hideModal = () => {
+		setModalVisible(false);
+	};
+
+	const renderDropdownOptions = () => {
+		// Customize your dropdown options
+		return (
+			<View style={styles.dropdownContainer}>
+				{/* <Text>
+          {selectedPost?.username}
+        </Text> */}
+				<TouchableOpacity
+					style={styles.dropdownOption}
+					onPress={() => console.log('Unfollow clicked')}
+				>
+					<Text>Unfollow</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.dropdownOption}
+					onPress={() => console.log('Share clicked')}
+				>
+					<Text>Share</Text>
+				</TouchableOpacity>
+			</View>
+		);
+	};
 
 	handleLogout = async () => {
 		const loggedOut = await firebase.logout();
@@ -58,6 +93,23 @@ export default function ProfileScreen() {
 		}
 	};
 	return (
+		
+			<View style={styles.container}>
+					<FlatList
+						// data={data}
+						keyExtractor={item => item.id}
+						// renderItem={renderItem}
+					/>
+					<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>
+						{renderDropdownOptions()}
+					</Modal>
+				</View>
+				<View>
+					<TouchableOpacity onPress={() => ellipsisClicked(item)}>
+						<Ionicons name="ellipsis-horizontal" size={24} color="black" />
+					</TouchableOpacity>
+				</View>
+		
 		<ScrollView contentContainerStyle={styles.container}>
 			<SafeAreaView style={styles.content}>
 				<TouchableOpacity onPress={addProfilePic}>
@@ -94,10 +146,6 @@ export default function ProfileScreen() {
 						<Text>Posts</Text>
 					</View>
 				</View>
-				<View style={styles.profileContainer}>
-					<Button buttonStyle={styles.editProfileButton} title="Edit profile" />
-					<Button buttonStyle={styles.messageButton} title="Message" /> 
-				</View>
 				<TextInput
 					multiline
 					numberOfLines={4}
@@ -105,6 +153,9 @@ export default function ProfileScreen() {
 					style={styles.bio}
 				></TextInput>
 
+				<View>
+					<Carousel title="Posts" />
+				</View>
 				<View>
 					<Carousel carouselData={booksReadData} title="Books Read" />
 				</View>
@@ -118,12 +169,6 @@ export default function ProfileScreen() {
 					<Carousel
 						carouselData={futureBooksData}
 						title="To Be Read"
-					/>
-				</View>
-				<View>
-					<Carousel
-						// carouselData={postsData}
-						title="Posts"
 					/>
 				</View>
 				<Button buttonStyle={styles.logoutButton} onPress={handleLogout}>
