@@ -5,15 +5,26 @@ import {
 	Image,
 	StyleSheet,
 	Text,
+	TextInput,
 	TouchableOpacity,
 	View,
 } from 'react-native';
 import Modal from 'react-native-modal';
 
+const CommentSection = ({ comments }) => {
+	return (
+		<View>
+			{comments.map((comment, index) => (
+				<Text key={index}>{comment}</Text>
+			))}
+		</View>
+	);
+};
+
 const Feed = () => {
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
-  const [postLikeState, setPostLikeState] = useState({}); // Track like state for each post
+	const [postLikeState, setPostLikeState] = useState({}); // Track like state for each post
 
 	const ellipsisClicked = item => {
 		setSelectedPost(item);
@@ -24,19 +35,18 @@ const Feed = () => {
 		setModalVisible(false);
 	};
 
-  const toggleLike = (postId) => {
-    setPostLikeState((prevState) => ({
-      ...prevState,
-      [postId]: !prevState[postId] || false,
-    }));
-  };
-
+	const toggleLike = postId => {
+		setPostLikeState(prevState => ({
+			...prevState,
+			[postId]: !prevState[postId] || false,
+		}));
+	};
 
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
 		return (
 			<View style={styles.dropdownContainer}>
-        {/* <Text>
+				{/* <Text>
           {selectedPost?.username}
         </Text> */}
 				<TouchableOpacity
@@ -77,6 +87,16 @@ const Feed = () => {
 		// Add more posts as needed
 	];
 
+	const [comments, setComments] = useState({});
+	const [newComment, setNewComment] = useState('');
+
+	const addComment = (postId, newComment) => {
+		setComments(prevComments => ({
+			...prevComments,
+			[postId]: [...(prevComments[postId] || []), newComment],
+		}));
+	};
+
 	const renderItem = ({ item }) => (
 		<View style={styles.postContainer}>
 			<View style={styles.topContainer}>
@@ -95,15 +115,33 @@ const Feed = () => {
 			</View>
 			<Image source={item.postImage} style={styles.postImage} />
 			<View style={styles.heartButton}>
-      <TouchableOpacity onPress={() => toggleLike(item.id)}>
-          {postLikeState[item.id] ? (
-            <Ionicons name="heart" size={32} color="red" />
-          ) : (
-            <Ionicons name="heart-outline" size={32} color="black" />
-          )}
-        </TouchableOpacity>
+				<TouchableOpacity onPress={() => toggleLike(item.id)}>
+					{postLikeState[item.id] ? (
+						<Ionicons name="heart" size={32} color="red" />
+					) : (
+						<Ionicons name="heart-outline" size={32} color="black" />
+					)}
+				</TouchableOpacity>
 			</View>
 			<Text style={styles.caption}>{item.caption}</Text>
+			<CommentSection comments={comments[item.id] || []} />
+			<View style={styles.commentInputContainer}>
+				<TextInput
+					style={styles.commentInput}
+					placeholder="Add a comment..."
+					onChangeText={text => setNewComment(text)}
+					value={newComment}
+				/>
+				<TouchableOpacity
+					style={styles.commentButton}
+					onPress={() => {
+						addComment(item.id, newComment);
+						setNewComment('');
+					}}
+				>
+					<Text>Post</Text>
+				</TouchableOpacity>
+			</View>
 		</View>
 	);
 
@@ -164,7 +202,7 @@ const styles = StyleSheet.create({
 	},
 	heartButton: {
 		position: 'absolute',
-		bottom: 20,
+		bottom: 5,
 		right: 20,
 	},
 	dropdownContainer: {
@@ -176,5 +214,21 @@ const styles = StyleSheet.create({
 		paddingVertical: 8,
 		borderBottomWidth: 1,
 		borderBottomColor: '#ddd',
+	},
+	commentInputContainer: {
+		display: 'flex',
+		flexDirection: 'row',
+		width: '80%',
+		marginTop: 8,
+	},
+	commentInput: {
+		borderWidth: 1,
+		width: '80%',
+		padding: 8,
+	},
+	commentButton: {
+		borderWidth: 1,
+		padding: 8,
+		marginLeft: 8,
 	},
 });
