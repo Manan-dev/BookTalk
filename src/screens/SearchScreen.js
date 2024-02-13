@@ -1,9 +1,12 @@
 import React, {useState} from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, FlatList, Image, TouchableOpacity } from 'react-native';
 import SearchBar from '../components/SearchBar';   // Import the SearchBar component
+import searchRecommendation from '../data/searchRecommendation.json' // Import the data
 
 // Functional component for the SearchScreen
 const SearchScreen = () => {
+
+	const [searchResults, setSearchResults] = useState([])
 
 	// Define a function to handle the search action
 	const handleSeach = (query) => {
@@ -17,10 +20,19 @@ const SearchScreen = () => {
 
 			<SearchBar onSearch={handleSeach} />
 
-			{/* Content for the SearchScreen goes here */}
-			<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-				{/* <Text>Search Screen</Text> */}
-			</View>
+			{/* Display search recommendations in a grid */}
+
+			<FlatList
+				data={searchRecommendation}
+				numColumns={3}
+				keyExtractor={(item) => item.id}
+				renderItem={({ item }) => (
+					<TouchableOpacity onPress={() => console.log('Item clicked:', item.id)}>
+						<Image source={{ uri: item.content }} style={styles.image}/>
+					</TouchableOpacity>
+				)}
+			/>
+
 		</View>
 	);
 };
@@ -33,5 +45,24 @@ const styles = StyleSheet.create({
 		backgroundColor: '#fff',
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+
+	recommendedList: {
+		marginTop: 20,
+	},
+
+	recommendedItem: {
+		flex: 1,
+		alignItems: 'center',
+		margin: 10,
+		padding: 10,
+		backgroundColor: '#e0e0e0',
+		borderRadius: 8,
+	},
+	image: {
+		width: 120,
+		height: 200,
+		margin: 4,
+		borderRadius: 4,
 	},
 });
