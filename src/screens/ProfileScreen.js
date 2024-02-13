@@ -29,7 +29,7 @@ export default function ProfileScreen() {
 	const [isModalVisible, setModalVisible] = useState(false);
 	const firebase = useContext(FirebaseContext);
 	
-	const ellipsisClicked = item => {
+	const ellipsisClicked = () => {
 		setModalVisible(true);
 	};
 
@@ -37,24 +37,37 @@ export default function ProfileScreen() {
 		setModalVisible(false);
 	};
 
+	const handleShowMore = () => {
+		setModalVisible(true);
+	};
+
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
 		return (
 			<View style={styles.dropdownContainer}>
-				{/* <Text>
-          {selectedPost?.username}
-        </Text> */}
 				<TouchableOpacity
 					style={styles.dropdownOption}
-					onPress={() => console.log('Unfollow clicked')}
+					onPress={() => console.log('Edit Profile')}
 				>
-					<Text>Unfollow</Text>
+					<Text>Edit Profile</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={styles.dropdownOption}
-					onPress={() => console.log('Share clicked')}
+					onPress={() => console.log('Account Settings')}
 				>
-					<Text>Share</Text>
+					<Text>Account Settings</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.dropdownOption}
+					onPress={() => console.log('Share Profile')}
+				>
+					<Text>Share Profile</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={styles.dropdownOption}
+					onPress={() => console.log('About')}
+				>
+					<Text>About</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -93,25 +106,18 @@ export default function ProfileScreen() {
 		}
 	};
 	return (
-		
-			<View style={styles.container}>
-					<FlatList
-						// data={data}
-						keyExtractor={item => item.id}
-						// renderItem={renderItem}
-					/>
+		<ScrollView contentContainerStyle={styles.container}>
+			<SafeAreaView style={styles.content}>
+				<View style={styles.container}>
 					<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>
 						{renderDropdownOptions()}
 					</Modal>
 				</View>
-				<View>
-					<TouchableOpacity onPress={() => ellipsisClicked(item)}>
+				<View style={styles.ellipses}>
+					<TouchableOpacity onPress={() => ellipsisClicked()}>
 						<Ionicons name="ellipsis-horizontal" size={24} color="black" />
 					</TouchableOpacity>
 				</View>
-		
-		<ScrollView contentContainerStyle={styles.container}>
-			<SafeAreaView style={styles.content}>
 				<TouchableOpacity onPress={addProfilePic}>
 					{user.profilePhotoUrl ? (
 						<Image
@@ -189,6 +195,26 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		paddingHorizontal: 20,
 		alignItems:'flex-end',
+	},
+	// ellipsesContainer: {
+	// 	flexGrow: 1,
+	// 	alignItems: 'flex-end'
+	// },
+	ellipses: {
+		alignSelf: 'flex-end',
+		marginRight: 20
+	},
+	dropdownContainer: {
+		backgroundColor: 'white',
+		padding: 16,
+		borderRadius: 8,
+		alignSelf: 'flex-end',
+		marginBottom: 400
+	},
+	dropdownOption: {
+		paddingVertical: 8,
+		borderBottomWidth: 1,
+		borderBottomColor: '#ddd',
 	},
 	content: {
 		width: '100%',

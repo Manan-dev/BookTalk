@@ -1,6 +1,6 @@
 [
 	{
 		"id": "1",
-		"imageURL": "assets/plus-sign.png"
+		"imageURL": "../assets/plus-sign.png"
 	}
 ]
