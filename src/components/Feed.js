@@ -10,12 +10,28 @@ import {
 	View,
 } from 'react-native';
 import Modal from 'react-native-modal';
+import { UserContext } from '../context/UserContext';
 
-const CommentSection = ({ comments }) => {
+const CommentSection = ({ comments, currentUser }) => {
 	return (
 		<View>
 			{comments.map((comment, index) => (
-				<Text key={index}>{comment}</Text>
+				<View key={index} style={styles.comment}>
+					<Image
+						source={{
+							uri:
+								currentUser.profilePhotoUrl ||
+								'https://via.placeholder.com/150',
+						}}
+						style={styles.commentsProfilePic}
+					/>
+					<View style={styles.commentContent}>
+						<Text style={styles.currentUser}>{currentUser.username}: </Text>
+						<Text key={index} style={styles.commentText}>
+							{comment}
+						</Text>
+					</View>
+				</View>
 			))}
 		</View>
 	);
@@ -25,6 +41,7 @@ const Feed = () => {
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [postLikeState, setPostLikeState] = useState({}); // Track like state for each post
+	const [user, _] = React.useContext(UserContext);
 
 	const ellipsisClicked = item => {
 		setSelectedPost(item);
@@ -91,6 +108,8 @@ const Feed = () => {
 	const [newComment, setNewComment] = useState('');
 
 	const addComment = (postId, newComment) => {
+		// check comment is not empty
+		if (!newComment) return;
 		setComments(prevComments => ({
 			...prevComments,
 			[postId]: [...(prevComments[postId] || []), newComment],
@@ -124,7 +143,8 @@ const Feed = () => {
 				</TouchableOpacity>
 			</View>
 			<Text style={styles.caption}>{item.caption}</Text>
-			<CommentSection comments={comments[item.id] || []} />
+			<CommentSection comments={comments[item.id] || []} currentUser={user} />
+
 			<View style={styles.commentInputContainer}>
 				<TextInput
 					style={styles.commentInput}
@@ -202,7 +222,7 @@ const styles = StyleSheet.create({
 	},
 	heartButton: {
 		position: 'absolute',
-		bottom: 5,
+		bottom: 10,
 		right: 20,
 	},
 	dropdownContainer: {
@@ -218,7 +238,7 @@ const styles = StyleSheet.create({
 	commentInputContainer: {
 		display: 'flex',
 		flexDirection: 'row',
-		width: '80%',
+		width: '70%',
 		marginTop: 8,
 	},
 	commentInput: {
@@ -230,5 +250,34 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		padding: 8,
 		marginLeft: 8,
+	},
+	comment: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 8,
+		borderWidth: 1,
+		borderRadius: 8,
+		padding: 4,
+	},
+	currentUser: {
+		fontWeight: 'bold',
+	},
+	commentsProfilePic: {
+		width: 30,
+		height: 30,
+		borderRadius: 30,
+		borderColor: '#000',
+		borderWidth: 1,
+		marginRight: 8,
+	},
+	commentContent: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+		maxWidth: '80%',
+	},
+	commentText: {
+		flex: 1,
+		flexWrap: 'wrap',
 	},
 });
