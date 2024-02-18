@@ -106,6 +106,7 @@ const Feed = () => {
 
 	const [comments, setComments] = useState({});
 	const [newComment, setNewComment] = useState('');
+	const [commentModalVisible, setCommentModalVisible] = useState(false);
 
 	const addComment = (postId, newComment) => {
 		// check comment is not empty
@@ -114,6 +115,10 @@ const Feed = () => {
 			...prevComments,
 			[postId]: [...(prevComments[postId] || []), newComment],
 		}));
+	};
+
+	const addCommentModal = item => {
+		setCommentModalVisible(true);
 	};
 
 	const renderItem = ({ item }) => (
@@ -143,25 +148,40 @@ const Feed = () => {
 				</TouchableOpacity>
 			</View>
 			<Text style={styles.caption}>{item.caption}</Text>
-			<CommentSection comments={comments[item.id] || []} currentUser={user} />
-
-			<View style={styles.commentInputContainer}>
-				<TextInput
-					style={styles.commentInput}
-					placeholder="Add a comment..."
-					onChangeText={text => setNewComment(text)}
-					value={newComment}
-				/>
-				<TouchableOpacity
-					style={styles.commentButton}
-					onPress={() => {
-						addComment(item.id, newComment);
-						setNewComment('');
-					}}
-				>
-					<Text>Post</Text>
-				</TouchableOpacity>
-			</View>
+			<TouchableOpacity
+				style={styles.addCommentButton}
+				onPress={() => addCommentModal(item)}
+			>
+				<Text>Add a comment...</Text>
+			</TouchableOpacity>
+			<Modal
+				isVisible={commentModalVisible}
+				onBackdropPress={() => setCommentModalVisible(false)}
+			>
+				<View style={styles.commentModalContainer}>
+					<View style={styles.commentInputContainer}>
+						<TextInput
+							style={styles.commentInput}
+							placeholder="Add a comment..."
+							onChangeText={text => setNewComment(text)}
+							value={newComment}
+						/>
+						<TouchableOpacity
+							style={styles.commentButton}
+							onPress={() => {
+								addComment(item.id, newComment);
+								setNewComment('');
+							}}
+						>
+							<Text>Post</Text>
+						</TouchableOpacity>
+					</View>
+					<CommentSection
+						comments={comments[item.id] || []}
+						currentUser={user}
+					/>
+				</View>
+			</Modal>
 		</View>
 	);
 
@@ -235,11 +255,24 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: '#ddd',
 	},
+	addCommentButton: {
+		marginTop: 8,
+		backgroundColor: '#ddd',
+		width: '80%',
+		padding: 8,
+		borderRadius: 8,
+	},
+	commentModalContainer: {
+		width: '100%',
+		backgroundColor: '#fff',
+		padding: 16,
+	},
 	commentInputContainer: {
 		display: 'flex',
 		flexDirection: 'row',
-		width: '70%',
-		marginTop: 8,
+		justifyContent: 'space-around',
+		backgroundColor: '#fff',
+		marginBottom: 8,
 	},
 	commentInput: {
 		borderWidth: 1,
@@ -250,6 +283,8 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		padding: 8,
 		marginLeft: 8,
+		// blue color
+		backgroundColor: '#1E90FF',
 	},
 	comment: {
 		flexDirection: 'row',
