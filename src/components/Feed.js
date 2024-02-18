@@ -118,6 +118,7 @@ const Feed = () => {
 	};
 
 	const addCommentModal = item => {
+		setSelectedPost(item);
 		setCommentModalVisible(true);
 	};
 
@@ -155,8 +156,11 @@ const Feed = () => {
 				<Text>Add a comment...</Text>
 			</TouchableOpacity>
 			<Modal
-				isVisible={commentModalVisible}
-				onBackdropPress={() => setCommentModalVisible(false)}
+				isVisible={commentModalVisible && selectedPost?.id === item.id}
+				onBackdropPress={() => {
+					setCommentModalVisible(false);
+					setSelectedPost(null);
+				}}
 			>
 				<View style={styles.commentModalContainer}>
 					<View style={styles.commentInputContainer}>
