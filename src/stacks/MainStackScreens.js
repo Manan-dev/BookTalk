@@ -3,9 +3,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 
 import CustomHeader from '../components/CustomHeader';
+import CreatePostScreen from '../screens/CreatePostScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
-import PostScreen from '../screens/PostScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
 
@@ -43,8 +43,8 @@ export default MainStackScreens = () => {
 				}}
 			/>
 			<MainStack.Screen
-				name="Post"
-				component={PostScreen}
+				name="CreatePost"
+				component={CreatePostScreen}
 				options={{
 					tabBarIcon: () => (
 						<Ionicons name="ios-add-circle" color="#E9446A" size={52} />
