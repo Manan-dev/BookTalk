@@ -17,30 +17,36 @@ import {
 import { SafeAreaView } from 'react-navigation';
 import Carousel from '../components/Carousel';
 import Modal from 'react-native-modal';
+import SearchBar from '../components/SearchBar';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 import booksReadData from '../data/booksRead.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
-// import postsData from '../data/postsData.json'
+import postsData from '../data/postsData.json'
 
 export default function ProfileScreen() {
 	const [user, setUser] = useContext(UserContext);
 	const [isModalVisible, setModalVisible] = useState(false);
+	const [isModalVisible1, setModalVisible1] = useState(false);
 	const firebase = useContext(FirebaseContext);
+	const [showMore0, setShowMore0] = useState(false);
+	const [showMore1, setShowMore1] = useState(false);
+	const [showMore2, setShowMore2] = useState(false);
+	const [showMore3, setShowMore3] = useState(false);
 	
 	const ellipsisClicked = () => {
 		setModalVisible(true);
 	};
 
+	const toggleModal = () => {
+		setModalVisible1(!isModalVisible1);
+	};
+
 	const hideModal = () => {
 		setModalVisible(false);
 	};
-
-	const handleShowMore = () => {
-		setModalVisible(true);
-	};
-
+	
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
 		return (
@@ -160,23 +166,63 @@ export default function ProfileScreen() {
 				></TextInput>
 
 				<View>
-					<Carousel title="Posts" />
+					<Carousel 
+						carouselData={postsData}
+						title="Posts" 
+						showMore={showMore0}
+						toggleShowMore={() => setShowMore0(!showMore0)}
+						posts={true}
+					/>
 				</View>
 				<View>
-					<Carousel carouselData={booksReadData} title="Books Read" />
+					<Carousel 
+						carouselData={booksReadData} 
+						title="Books Read"
+						showMore={showMore1}
+						toggleShowMore={() => setShowMore1(!showMore1)}
+						toggleModal={toggleModal}
+						posts={false}
+					/>
 				</View>
 				<View>
 					<Carousel
 						carouselData={mysteryBooksData}
 						title="My Favorite Mystery Books"
+						showMore={showMore2}
+						toggleShowMore={() => setShowMore2(!showMore2)} 
+						toggleModal={toggleModal}
+						posts={false}
 					/>
 				</View>
 				<View>
 					<Carousel
 						carouselData={futureBooksData}
 						title="To Be Read"
+						showMore={showMore3}
+						toggleShowMore={() => setShowMore3(!showMore3)}
+						toggleModal={toggleModal} 
+						posts={false}
 					/>
 				</View>
+				<Modal isVisible={isModalVisible1} onBackdropPress={() => setModalVisible1(true)}>
+					<View style={styles.modalContainer}>
+						<View style={styles.searchModal}>
+							<SearchBar
+								placeholder="Search..."
+								onChangeText={(text) => {
+									// Implement your search logic here
+								}}
+								onCancelButtonPress={() => {
+									// Handle cancel button press if needed
+									setModalVisible1(false);
+								}}
+							/>
+							<TouchableOpacity style={styles.closeModal} onPress={() => setModalVisible1(false)}>
+								<Text>Close Modal</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</Modal>
 				<Button buttonStyle={styles.logoutButton} onPress={handleLogout}>
 					Log Out
 				</Button>
@@ -196,10 +242,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		alignItems:'flex-end',
 	},
-	// ellipsesContainer: {
-	// 	flexGrow: 1,
-	// 	alignItems: 'flex-end'
-	// },
 	ellipses: {
 		alignSelf: 'flex-end',
 		marginRight: 20
@@ -241,6 +283,30 @@ const styles = StyleSheet.create({
 		width: 150,
 		height: 150,
 		borderRadius: 150 / 2,
+	},
+	closeModal: {
+		position: 'absolute',
+        bottom: 20,
+        right: 20,
+        backgroundColor: 'gray',
+        width: 100,
+        height: 25,
+        justifyContent: 'center',
+        alignItems: 'center',
+	},
+	modalContainer: {
+		flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+		width: '100%',
+	},
+	searchModal: { 
+		backgroundColor: 'white',
+		width: '100%',
+		flex: 1, 
+		marginTop: 100, 
+		justifyContent: 'flex-start', 
+		alignItems: 'center',
 	},
 	username: {
 		fontSize: 25,
