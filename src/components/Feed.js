@@ -267,7 +267,8 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 	},
 	commentModalContainer: {
-		width: '100%',
+		alignSelf: 'center',
+		width: '110%',
 		backgroundColor: '#fff',
 		padding: 16,
 	},
