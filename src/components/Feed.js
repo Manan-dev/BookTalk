@@ -10,12 +10,28 @@ import {
 	View,
 } from 'react-native';
 import Modal from 'react-native-modal';
+import { UserContext } from '../context/UserContext';
 
-const CommentSection = ({ comments }) => {
+const CommentSection = ({ comments, currentUser }) => {
 	return (
 		<View>
 			{comments.map((comment, index) => (
-				<Text key={index}>{comment}</Text>
+				<View key={index} style={styles.comment}>
+					<Image
+						source={{
+							uri:
+								currentUser.profilePhotoUrl ||
+								'https://via.placeholder.com/150',
+						}}
+						style={styles.commentsProfilePic}
+					/>
+					<View style={styles.commentContent}>
+						<Text style={styles.currentUser}>{currentUser.username}: </Text>
+						<Text key={index} style={styles.commentText}>
+							{comment}
+						</Text>
+					</View>
+				</View>
 			))}
 		</View>
 	);
@@ -25,6 +41,7 @@ const Feed = () => {
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [postLikeState, setPostLikeState] = useState({}); // Track like state for each post
+	const [user, _] = React.useContext(UserContext);
 
 	const ellipsisClicked = item => {
 		setSelectedPost(item);
@@ -89,12 +106,20 @@ const Feed = () => {
 
 	const [comments, setComments] = useState({});
 	const [newComment, setNewComment] = useState('');
+	const [commentModalVisible, setCommentModalVisible] = useState(false);
 
 	const addComment = (postId, newComment) => {
+		// check comment is not empty
+		if (!newComment) return;
 		setComments(prevComments => ({
 			...prevComments,
 			[postId]: [...(prevComments[postId] || []), newComment],
 		}));
+	};
+
+	const addCommentModal = item => {
+		setSelectedPost(item);
+		setCommentModalVisible(true);
 	};
 
 	const renderItem = ({ item }) => (
@@ -124,24 +149,43 @@ const Feed = () => {
 				</TouchableOpacity>
 			</View>
 			<Text style={styles.caption}>{item.caption}</Text>
-			<CommentSection comments={comments[item.id] || []} />
-			<View style={styles.commentInputContainer}>
-				<TextInput
-					style={styles.commentInput}
-					placeholder="Add a comment..."
-					onChangeText={text => setNewComment(text)}
-					value={newComment}
-				/>
-				<TouchableOpacity
-					style={styles.commentButton}
-					onPress={() => {
-						addComment(item.id, newComment);
-						setNewComment('');
-					}}
-				>
-					<Text>Post</Text>
-				</TouchableOpacity>
-			</View>
+			<TouchableOpacity
+				style={styles.addCommentButton}
+				onPress={() => addCommentModal(item)}
+			>
+				<Text>Add a comment...</Text>
+			</TouchableOpacity>
+			<Modal
+				isVisible={commentModalVisible && selectedPost?.id === item.id}
+				onBackdropPress={() => {
+					setCommentModalVisible(false);
+					setSelectedPost(null);
+				}}
+			>
+				<View style={styles.commentModalContainer}>
+					<View style={styles.commentInputContainer}>
+						<TextInput
+							style={styles.commentInput}
+							placeholder="Add a comment..."
+							onChangeText={text => setNewComment(text)}
+							value={newComment}
+						/>
+						<TouchableOpacity
+							style={styles.commentButton}
+							onPress={() => {
+								addComment(item.id, newComment);
+								setNewComment('');
+							}}
+						>
+							<Text>Post</Text>
+						</TouchableOpacity>
+					</View>
+					<CommentSection
+						comments={comments[item.id] || []}
+						currentUser={user}
+					/>
+				</View>
+			</Modal>
 		</View>
 	);
 
@@ -202,7 +246,7 @@ const styles = StyleSheet.create({
 	},
 	heartButton: {
 		position: 'absolute',
-		bottom: 5,
+		bottom: 10,
 		right: 20,
 	},
 	dropdownContainer: {
@@ -215,11 +259,25 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: '#ddd',
 	},
+	addCommentButton: {
+		marginTop: 8,
+		backgroundColor: '#ddd',
+		width: '80%',
+		padding: 8,
+		borderRadius: 8,
+	},
+	commentModalContainer: {
+		alignSelf: 'center',
+		width: '110%',
+		backgroundColor: '#fff',
+		padding: 16,
+	},
 	commentInputContainer: {
 		display: 'flex',
 		flexDirection: 'row',
-		width: '80%',
-		marginTop: 8,
+		justifyContent: 'space-around',
+		backgroundColor: '#fff',
+		marginBottom: 8,
 	},
 	commentInput: {
 		borderWidth: 1,
@@ -230,5 +288,36 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		padding: 8,
 		marginLeft: 8,
+		// blue color
+		backgroundColor: '#1E90FF',
+	},
+	comment: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 8,
+		borderWidth: 1,
+		borderRadius: 8,
+		padding: 4,
+	},
+	currentUser: {
+		fontWeight: 'bold',
+	},
+	commentsProfilePic: {
+		width: 30,
+		height: 30,
+		borderRadius: 30,
+		borderColor: '#000',
+		borderWidth: 1,
+		marginRight: 8,
+	},
+	commentContent: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+		maxWidth: '80%',
+	},
+	commentText: {
+		flex: 1,
+		flexWrap: 'wrap',
 	},
 });
