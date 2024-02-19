@@ -1,11 +1,25 @@
+import { useNavigation } from '@react-navigation/native';
 import { Text } from '@rneui/themed';
 import React from 'react';
-import { FlatList, StyleSheet, Button, View, Image, TouchableOpacity, Posts } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import Book from './Book.js';
 
-const Carousel = ({ carouselData, title, showMore, toggleShowMore, toggleModal, posts }) => {
+const Carousel = ({
+	carouselData,
+	title,
+	showMore,
+	toggleShowMore,
+	toggleModal,
+	posts,
+}) => {
+	const navigation = useNavigation();
+	const handleBookPress = book => {
+		navigation.navigate('BookDetailsScreen', { book });
+	};
+
 	const renderItem = ({ item }) => (
 		<View style={styles.item}>
-			<TouchableOpacity><Image source={{ url: item.imageURL }} style={{width:75, height:120}}/></TouchableOpacity>
+			<Book book={item} onPress={handleBookPress} />
 		</View>
 	);
 
@@ -16,11 +30,16 @@ const Carousel = ({ carouselData, title, showMore, toggleShowMore, toggleModal, 
 	const renderShowMoreButton = () => (
 		<View style={styles.carouselButtonContainer}>
 			<TouchableOpacity onPress={toggleShowMore} style={styles.showMoreButton}>
-				<Text style={{color: '#006ee6'}}>{showMore ? 'Show Less' : 'Show More >'}</Text>
+				<Text style={{ color: '#006ee6' }}>
+					{showMore ? 'Show Less' : 'Show More >'}
+				</Text>
 			</TouchableOpacity>
 			{posts === false && (
-				<TouchableOpacity style={styles.addMore} onPress={handleModalButtonPress}>
-					<Text style={{fontSize: 25, color: '#006ee6'}}>+</Text>
+				<TouchableOpacity
+					style={styles.addMore}
+					onPress={handleModalButtonPress}
+				>
+					<Text style={{ fontSize: 25, color: '#006ee6' }}>+</Text>
 				</TouchableOpacity>
 			)}
 		</View>
@@ -31,7 +50,7 @@ const Carousel = ({ carouselData, title, showMore, toggleShowMore, toggleModal, 
 			<Text h4 h4Style={{ fontSize: 20, marginBottom: 5 }}>
 				{title}
 			</Text>
-			
+
 			<FlatList
 				data={carouselData.slice(0, showMore ? carouselData.length : 5)}
 				renderItem={renderItem}
@@ -70,7 +89,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center', // Align items vertically
-        paddingHorizontal: 0,
+		paddingHorizontal: 0,
 		position: 'absolute',
 		top: 5,
 		right: 5,
@@ -79,7 +98,7 @@ const styles = StyleSheet.create({
 	addMore: {
 		marginRight: 5,
 		marginBottom: 2,
-    },
+	},
 	showMoreButton: {
 		marginTop: 5,
 		marginRight: 15,
