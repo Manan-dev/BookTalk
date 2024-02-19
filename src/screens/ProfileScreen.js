@@ -297,8 +297,8 @@ const styles = StyleSheet.create({
 	modalContainer: {
 		flex: 1,
         justifyContent: 'center',
-        alignItems: 'center',
-		width: '100%',
+        alignSelf: 'center',
+		width: '110%',
 	},
 	searchModal: { 
 		backgroundColor: 'white',
