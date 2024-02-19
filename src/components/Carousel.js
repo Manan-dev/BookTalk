@@ -49,7 +49,7 @@ export default Carousel;
 const styles = StyleSheet.create({
 	container: {
 		width: '100%',
-		height: '140',
+		height: 170,
 		paddingLeft: 5,
 		paddingTop: 5,
 		paddingBottom: 5,
