@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, FlatList, Image, TouchableOpacity, Text } from 'react-native';
 import SearchBar from '../components/SearchBar'; // Import the SearchBar component
-import BookDetailsModal from '../components/BookDetailsPage';
 import axios from 'axios';
 import {BOOK_API_KEY} from '@env';
 
@@ -50,7 +49,7 @@ const SearchScreen = () => {
 		try {
 
 			// Define the number of random books you want to fetch
-			const numberOfBooks = 6;
+			const numberOfBooks = 9;
 
 			// Make a GET request to the Books-API to get random books
 			const requests = Array.from({ length: numberOfBooks }, async (_,index) => {
