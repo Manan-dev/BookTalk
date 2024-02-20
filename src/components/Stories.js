@@ -36,7 +36,7 @@ export default Stories;
 
 const styles = StyleSheet.create({
 	container: {
-		height: 81,
+		height: 90,
 		backgroundColor: '#fff',
 		paddingBottom: 10,
 		marginBottom: 16,

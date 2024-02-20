@@ -15,7 +15,10 @@ const CustomHeader = () => {
 	}
 	return (
 		<SafeAreaView style={styles.container}>
-			<TouchableOpacity onPress={() => navigation.navigate('Home')}>
+			<TouchableOpacity
+				style={styles.logoButton}
+				onPress={() => navigation.navigate('Home')}
+			>
 				<Text h3 h3Style={styles.logoText}>
 					BookTalk
 				</Text>
@@ -36,5 +39,8 @@ const styles = StyleSheet.create({
 		fontFamily: 'Kings_400Regular',
 		marginLeft: 15,
 		marginTop: 10,
+	},
+	logoButton: {
+		width: '40%',
 	},
 });
