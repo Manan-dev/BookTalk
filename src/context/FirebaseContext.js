@@ -7,7 +7,14 @@ import {
 	initializeAuth,
 	signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import {
+	collection,
+	doc,
+	getDoc,
+	getDocs,
+	getFirestore,
+	setDoc,
+} from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
@@ -108,6 +115,39 @@ const Firebase = {
 			console.log('Error @logOut: ', error.message);
 		}
 		return false;
+	},
+	getAllPosts: async () => {
+		const posts = [];
+
+		try {
+			// Query all user documents
+			const usersSnapshot = await getDocs(collection(db, 'users'));
+
+			// Loop through each user document
+			for (const userDoc of usersSnapshot.docs) {
+				// Get the posts subcollection for the current user
+				const postsCollection = collection(userDoc.ref, 'posts');
+
+				// Query all post documents for the current user
+				const postsSnapshot = await getDocs(postsCollection);
+
+				// Loop through each post document
+				postsSnapshot.forEach(postDoc => {
+					// Add post data to the posts array
+					posts.push({
+						id: postDoc.id,
+						userId: userDoc.id,
+						...postDoc.data(),
+					});
+				});
+			}
+
+			// Return the array of posts
+			return posts;
+		} catch (error) {
+			console.error('Error getting posts:', error);
+			return [];
+		}
 	},
 };
 

@@ -9,7 +9,9 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import { Button } from 'react-native-elements';
 import Modal from 'react-native-modal';
+import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 
 const CommentSection = ({ comments, currentUser }) => {
@@ -42,10 +44,16 @@ const Feed = () => {
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [postLikeState, setPostLikeState] = useState({}); // Track like state for each post
 	const [user, _] = React.useContext(UserContext);
+	const firebase = React.useContext(FirebaseContext);
 
 	const ellipsisClicked = item => {
-		setSelectedPost(item);
-		setModalVisible(true);
+		// setSelectedPost(item);
+		// setModalVisible(true);
+	};
+
+	const fetchPosts = async () => {
+		const posts = await firebase.getAllPosts();
+		console.log(posts);
 	};
 
 	const hideModal = () => {
@@ -132,6 +140,7 @@ const Feed = () => {
 					/>
 					<Text style={styles.username}>{item.username}</Text>
 				</View>
+				<Button title="Fetch Posts" onPress={fetchPosts} />
 				<View>
 					<TouchableOpacity onPress={() => ellipsisClicked(item)}>
 						<Ionicons name="ellipsis-horizontal" size={24} color="black" />
