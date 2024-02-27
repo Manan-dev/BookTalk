@@ -1,4 +1,5 @@
 import { MaterialIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React, { useState } from 'react';
 import {
 	Image,
@@ -13,11 +14,16 @@ import {
 export default function CreatePostScreen() {
 	const [postText, setPostText] = useState('');
 	const [media, setMedia] = useState(null);
+	const navigation = useNavigation();
 
 	const handlePost = () => {
 		// Handle posting logic here
 		console.log('Post:', postText);
 		console.log('Media:', media);
+		setPostText('');
+		setMedia(null);
+		// navigate to previous screen
+		navigation.goBack();
 	};
 
 	const handleAddMedia = () => {
@@ -30,7 +36,7 @@ export default function CreatePostScreen() {
 			<View style={styles.header}>
 				<TouchableOpacity
 					style={styles.headerButton}
-					onPress={() => console.log('Cancel')}
+					onPress={() => navigation.goBack()}
 				>
 					<Text style={styles.headerButtonText}>Cancel</Text>
 				</TouchableOpacity>
@@ -43,7 +49,7 @@ export default function CreatePostScreen() {
 					<TextInput
 						style={styles.input}
 						placeholder="Write your post here..."
-						onChangeText={setPostText}
+						onChangeText={text => setPostText(text)}
 						value={postText}
 						multiline
 					/>
