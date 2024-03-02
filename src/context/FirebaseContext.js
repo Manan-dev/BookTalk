@@ -125,6 +125,10 @@ const Firebase = {
 
 			// Loop through each user document
 			for (const userDoc of usersSnapshot.docs) {
+				// Get the profile photo URL for the current user
+				const profilePhotoUrl = userDoc.data().profilePhotoUrl;
+				const username = userDoc.data().username;
+
 				// Get the posts subcollection for the current user
 				const postsCollection = collection(userDoc.ref, 'posts');
 
@@ -137,6 +141,8 @@ const Firebase = {
 					posts.push({
 						id: postDoc.id,
 						userId: userDoc.id,
+						profilePhotoUrl,
+						username,
 						...postDoc.data(),
 					});
 				});

@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	FlatList,
 	Image,
@@ -9,7 +9,6 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import { Button } from 'react-native-elements';
 import Modal from 'react-native-modal';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
@@ -45,16 +44,21 @@ const Feed = () => {
 	const [postLikeState, setPostLikeState] = useState({}); // Track like state for each post
 	const [user, _] = React.useContext(UserContext);
 	const firebase = React.useContext(FirebaseContext);
+	const [posts, setPosts] = useState([]);
 
 	const ellipsisClicked = item => {
-		// setSelectedPost(item);
-		// setModalVisible(true);
+		setSelectedPost(item);
+		setModalVisible(true);
 	};
 
-	const fetchPosts = async () => {
-		const posts = await firebase.getAllPosts();
-		console.log(posts);
-	};
+	useEffect(() => {
+		const fetchPosts = async () => {
+			const posts = await firebase.getAllPosts();
+			setPosts(posts);
+			// console.log(posts);
+		};
+		fetchPosts();
+	}, []);
 
 	const hideModal = () => {
 		setModalVisible(false);
@@ -90,28 +94,6 @@ const Feed = () => {
 		);
 	};
 
-	const data = [
-		{
-			id: '1',
-			username: 'user1',
-			postImage: require('../../assets/favicon.png'),
-			caption: 'This is the first post.',
-		},
-		{
-			id: '2',
-			username: 'user2',
-			postImage: require('../../assets/favicon.png'),
-			caption: 'This is the second post.',
-		},
-		{
-			id: '3',
-			username: 'user3',
-			postImage: require('../../assets/favicon.png'),
-			caption: 'This is the third post.',
-		},
-		// Add more posts as needed
-	];
-
 	const [comments, setComments] = useState({});
 	const [newComment, setNewComment] = useState('');
 	const [commentModalVisible, setCommentModalVisible] = useState(false);
@@ -135,19 +117,18 @@ const Feed = () => {
 			<View style={styles.topContainer}>
 				<View style={styles.userInfoContainer}>
 					<Image
-						source={require('../../assets/favicon.png')}
+						source={{ uri: item.profilePhotoUrl }}
 						style={styles.profilePic}
 					/>
 					<Text style={styles.username}>{item.username}</Text>
 				</View>
-				<Button title="Fetch Posts" onPress={fetchPosts} />
 				<View>
 					<TouchableOpacity onPress={() => ellipsisClicked(item)}>
 						<Ionicons name="ellipsis-horizontal" size={24} color="black" />
 					</TouchableOpacity>
 				</View>
 			</View>
-			<Image source={item.postImage} style={styles.postImage} />
+			<Image source={{ uri: item.imageURL }} style={styles.postImage} />
 			<View style={styles.heartButton}>
 				<TouchableOpacity onPress={() => toggleLike(item.id)}>
 					{postLikeState[item.id] ? (
@@ -201,7 +182,7 @@ const Feed = () => {
 	return (
 		<View style={styles.container}>
 			<FlatList
-				data={data}
+				data={posts}
 				keyExtractor={item => item.id}
 				renderItem={renderItem}
 			/>
@@ -227,9 +208,9 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	postImage: {
-		width: '100%',
-		height: 300,
-		borderRadius: 8,
+		width: '105%',
+		alignSelf: 'center',
+		height: 270,
 		resizeMode: 'contain',
 	},
 	caption: {
