@@ -49,7 +49,7 @@ const SearchScreen = () => {
 		try {
 
 			// Define the number of random books you want to fetch
-			const numberOfBooks = 9;
+			const numberOfBooks = 12;
 
 			// Make a GET request to the Books-API to get random books
 			const requests = Array.from({ length: numberOfBooks }, async (_,index) => {
