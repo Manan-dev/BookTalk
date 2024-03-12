@@ -117,57 +117,48 @@ const Firebase = {
 		return false;
 	},
 	getAllPosts: async () => {
-		const posts = [];
-		const comments = [];
-
 		try {
-			// Query all user documents
 			const usersSnapshot = await getDocs(collection(db, 'users'));
 
-			// Loop through each user document
-			for (const userDoc of usersSnapshot.docs) {
-				// Get the profile photo URL for the current user
+			const postsPromises = usersSnapshot.docs.map(async userDoc => {
 				const profilePhotoUrl = userDoc.data().profilePhotoUrl;
 				const username = userDoc.data().username;
 
-				// Get the posts subcollection for the current user
 				const postsCollection = collection(userDoc.ref, 'posts');
-				// Query all post documents for the current user
 				const postsSnapshot = await getDocs(postsCollection);
 
-				// Loop through each post document
-				postsSnapshot.forEach(async postDoc => {
-					const commentsCollection = collection(postDoc.ref, 'comments');
-					// Query all comment documents for the current post
-					const commentsSnapshot = await getDocs(commentsCollection);
+				const posts = await Promise.all(
+					postsSnapshot.docs.map(async postDoc => {
+						const commentsCollection = collection(postDoc.ref, 'comments');
+						const commentsSnapshot = await getDocs(commentsCollection);
 
-					const comments = [];
-					// Loop through each comment document
-					commentsSnapshot.forEach(commentDoc => {
-						// Add comment data to the comments array
-						comments.push({
+						const comments = commentsSnapshot.docs.map(commentDoc => ({
 							commentId: commentDoc.id,
 							postID: postDoc.id,
-							commentingUserID: commentDoc.data().userID,
+							commentingUserID: commentDoc.data().userId,
 							commentingUsername: commentDoc.data().username,
 							commentingUserPhotoURL: commentDoc.data().profilePhotoUrl,
 							commentText: commentDoc.data().text,
-						});
-					});
-					// Add post data to the posts array
-					posts.push({
-						id: postDoc.id,
-						userId: userDoc.id,
-						profilePhotoUrl,
-						username,
-						comments,
-						...postDoc.data(),
-					});
-				});
-			}
+						}));
 
-			// Return the array of posts
-			return posts;
+						return {
+							id: postDoc.id,
+							userId: userDoc.id,
+							profilePhotoUrl,
+							username,
+							comments,
+							...postDoc.data(),
+						};
+					})
+				);
+
+				return posts;
+			});
+
+			const allPosts = await Promise.all(postsPromises);
+
+			// Flatten the array of arrays into a single array
+			return allPosts.flat();
 		} catch (error) {
 			console.error('Error getting posts:', error);
 			return [];
