@@ -118,6 +118,7 @@ const Firebase = {
 	},
 	getAllPosts: async () => {
 		const posts = [];
+		const comments = [];
 
 		try {
 			// Query all user documents
@@ -131,18 +132,35 @@ const Firebase = {
 
 				// Get the posts subcollection for the current user
 				const postsCollection = collection(userDoc.ref, 'posts');
-
 				// Query all post documents for the current user
 				const postsSnapshot = await getDocs(postsCollection);
 
 				// Loop through each post document
-				postsSnapshot.forEach(postDoc => {
+				postsSnapshot.forEach(async postDoc => {
+					const commentsCollection = collection(postDoc.ref, 'comments');
+					// Query all comment documents for the current post
+					const commentsSnapshot = await getDocs(commentsCollection);
+
+					const comments = [];
+					// Loop through each comment document
+					commentsSnapshot.forEach(commentDoc => {
+						// Add comment data to the comments array
+						comments.push({
+							commentId: commentDoc.id,
+							postID: postDoc.id,
+							commentingUserID: commentDoc.data().userID,
+							commentingUsername: commentDoc.data().username,
+							commentingUserPhotoURL: commentDoc.data().profilePhotoUrl,
+							commentText: commentDoc.data().text,
+						});
+					});
 					// Add post data to the posts array
 					posts.push({
 						id: postDoc.id,
 						userId: userDoc.id,
 						profilePhotoUrl,
 						username,
+						comments,
 						...postDoc.data(),
 					});
 				});
