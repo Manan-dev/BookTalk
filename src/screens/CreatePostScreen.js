@@ -1,5 +1,6 @@
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
 	Image,
@@ -26,9 +27,33 @@ export default function CreatePostScreen() {
 		navigation.goBack();
 	};
 
-	const handleAddMedia = () => {
-		// Handle adding media logic here
-		console.log('Add Media');
+	const handleAddMedia = async () => {
+		try {
+			const permissionResult =
+				await ImagePicker.requestMediaLibraryPermissionsAsync();
+			if (!permissionResult.granted) {
+				alert('Permission to access media library is required!');
+				return;
+			}
+
+			const pickerResult = await ImagePicker.launchImageLibraryAsync({
+				mediaTypes: ImagePicker.MediaTypeOptions.All,
+				aspect: [4, 3],
+				quality: 1,
+				allowsMultipleSelection: true,
+			});
+
+			if (!pickerResult.canceled) {
+				// If the user selected media, access them through the "assets" array
+				const selectedAssets = pickerResult.assets;
+				// Map the selected assets to their URIs
+				const mediaUris = selectedAssets.map(asset => asset.uri);
+				// Update state with the array of URIs
+				setMedia(mediaUris);
+			}
+		} catch (error) {
+			console.error('Error picking media:', error);
+		}
 	};
 
 	return (
@@ -59,7 +84,13 @@ export default function CreatePostScreen() {
 				</View>
 				{media && (
 					<ScrollView horizontal>
-						<Image source={{ uri: media }} style={styles.mediaPreview} />
+						{media.map((uri, index) => (
+							<Image
+								key={index}
+								source={{ uri: uri }}
+								style={styles.mediaPreview}
+							/>
+						))}
 					</ScrollView>
 				)}
 			</View>
