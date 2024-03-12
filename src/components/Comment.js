@@ -4,24 +4,25 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 const Comment = ({ comments, currentUser }) => {
 	return (
 		<View>
-			{comments.map((comment, index) => (
-				<View key={index} style={styles.comment}>
-					<Image
-						source={{
-							uri:
-								comment.commentingUserPhotoURL ||
-								'https://via.placeholder.com/150',
-						}}
-						style={styles.commentsProfilePic}
-					/>
-					<View style={styles.commentContent}>
-						<Text style={styles.commentUsername}>
-							{comment.commentingUsername}:
-						</Text>
-						<Text style={styles.commentText}> {comment.commentText}</Text>
+			{comments &&
+				comments.map((comment, index) => (
+					<View key={index} style={styles.comment}>
+						<Image
+							source={{
+								uri:
+									comment.commentingUserPhotoURL ||
+									'https://via.placeholder.com/150',
+							}}
+							style={styles.commentsProfilePic}
+						/>
+						<View style={styles.commentContent}>
+							<Text style={styles.commentUsername}>
+								{comment.commentingUsername}:
+							</Text>
+							<Text style={styles.commentText}> {comment.commentText}</Text>
+						</View>
 					</View>
-				</View>
-			))}
+				))}
 		</View>
 	);
 };

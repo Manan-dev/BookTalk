@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
+	ActivityIndicator,
 	FlatList,
-	Image,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -113,18 +113,8 @@ const Feed = () => {
 
 	if (loading) {
 		return (
-			<View
-				style={{
-					display: 'flex',
-					flex: 1,
-					justifyContent: 'center',
-					alignItems: 'center',
-				}}
-			>
-				<Image
-					source={require('../../assets/loadingPosts.gif')}
-					style={{ width: 50, height: 50 }}
-				/>
+			<View style={styles.loadingContainer}>
+				<ActivityIndicator size="large" color="#E9446A" />
 			</View>
 		);
 	}
@@ -156,6 +146,11 @@ const styles = StyleSheet.create({
 		paddingVertical: 8,
 		borderBottomWidth: 1,
 		borderBottomColor: '#ddd',
+	},
+	loadingContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 });
 
