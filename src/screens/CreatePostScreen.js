@@ -1,21 +1,51 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { BOOK_API_KEY } from '@env';
 import { useNavigation } from '@react-navigation/native';
+import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
 	Image,
-	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
 	View,
 } from 'react-native';
+import SearchBar from '../components/SearchBar';
 
 export default function CreatePostScreen() {
+	const [searchResults, setSearchResults] = useState([]);
 	const [postText, setPostText] = useState('');
 	const [media, setMedia] = useState(null);
 	const navigation = useNavigation();
+	const [search, setSearch] = useState('');
+
+	const handleSearch = async query => {
+		// Update the searchQuery state
+		setSearch(query.trim());
+
+		// Upadate state or make API calls here
+		try {
+			// Make a GET request to the Books-API using Axios
+			const response = await axios.get(
+				'https://books-api7.p.rapidapi.com/books/find/title',
+				{
+					params: {
+						title: query,
+					},
+					headers: {
+						'X-RapidAPI-Key': BOOK_API_KEY,
+						'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
+					},
+				}
+			);
+
+			// Update the state with the search results
+			setSearchResults(response.data);
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
+	};
 
 	const handlePost = () => {
 		// Handle posting logic here
@@ -78,11 +108,14 @@ export default function CreatePostScreen() {
 						value={postText}
 						multiline
 					/>
-					<TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
+					{/* <TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
 						<MaterialIcons name="add-a-photo" size={24} color="white" />
-					</TouchableOpacity>
+					</TouchableOpacity> */}
+					<View style={styles.searchBar}>
+						<SearchBar onSearch={handleSearch} />
+					</View>
 				</View>
-				{media && (
+				{/* {media && (
 					<ScrollView horizontal>
 						{media.map((uri, index) => (
 							<Image
@@ -92,6 +125,15 @@ export default function CreatePostScreen() {
 							/>
 						))}
 					</ScrollView>
+				)} */}
+				{/* Display search results[0] - because only one book will be searched */}
+				{searchResults.length > 0 && (
+					<TouchableOpacity>
+						<Image
+							source={{ uri: searchResults[0].cover }}
+							style={styles.bookPreview}
+						/>
+					</TouchableOpacity>
 				)}
 			</View>
 		</View>
@@ -138,6 +180,7 @@ const styles = StyleSheet.create({
 	},
 	input: {
 		fontSize: 18,
+		minWidth: '98%',
 	},
 	mediaButton: {
 		backgroundColor: '#E9446A',
@@ -153,9 +196,24 @@ const styles = StyleSheet.create({
 		marginLeft: 10,
 	},
 	mediaPreview: {
-		width: 100,
-		height: 100,
+		position: 'absolute',
+		bottom: 20,
+		left: 10,
+		width: 120,
+		height: 200,
 		borderRadius: 10,
 		marginRight: 10,
+	},
+	bookPreview: {
+		width: 120,
+		height: 200,
+		borderRadius: 10,
+		marginRight: 10,
+	},
+	searchBar: {
+		width: '80%',
+		position: 'absolute',
+		bottom: 0,
+		right: 0,
 	},
 });
