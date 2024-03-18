@@ -1,30 +1,30 @@
 [
 	{
 		"id": "1",
-		"imageURL": "https://m.media-amazon.com/images/I/81FmL62MaML._AC_UF1000,1000_QL80_.jpg"
+		"title": "Pride and Prejudice"
 	},
 	{
 		"id": "2",
-		"imageURL": "https://m.media-amazon.com/images/I/81RBTG28sCL._AC_UF1000,1000_QL80_.jpg"
+		"title": "The Unconsoled"
 	},
 	{
 		"id": "3",
-		"imageURL": "https://m.media-amazon.com/images/I/81YkqyaFVEL._AC_UF1000,1000_QL80_.jpg"
+		"title": "The Spire"
 	},
 	{
 		"id": "4",
-		"imageURL": "https://m.media-amazon.com/images/I/81tZufOGaZL._AC_UF1000,1000_QL80_.jpg"
+		"title": "The Great Divorce"
 	},
 	{
 		"id": "5",
-		"imageURL": "https://m.media-amazon.com/images/I/71td5GDUZML._AC_UF1000,1000_QL80_.jpg"
+		"title": "The Screwtape Letters"
 	},
 	{
 		"id": "6",
-		"imageURL": "https://m.media-amazon.com/images/I/71EthOFfhAL._AC_UF1000,1000_QL80_.jpg"
+		"title": "Out of the Silent Planet"
 	},
 	{
 		"id": "7",
-		"imageURL": "https://m.media-amazon.com/images/I/71N+1tUQeoL._AC_UF1000,1000_QL80_.jpg"
+		"title": "Hard Times"
 	}
 ]

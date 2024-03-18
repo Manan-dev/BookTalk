@@ -1,20 +1,18 @@
 // BookComponent.js
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity } from 'react-native';
 
 const BookComponent = ({ book, onPress }) => {
 	return (
 		<TouchableOpacity style={styles.container} onPress={() => onPress(book)}>
-			<Image source={{ uri: book.coverImage }} style={styles.coverImage} />
-			<Text style={styles.title}>{book.title}</Text>
-			<Text style={styles.author}>{book.author}</Text>
+			<Image source={{ uri: book.cover }} style={styles.coverImage} />
 		</TouchableOpacity>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		margin: 10,
+		margin: 5,
 		borderRadius: 8,
 		backgroundColor: '#fff',
 		elevation: 4, // For Android shadow
@@ -24,10 +22,12 @@ const styles = StyleSheet.create({
 		shadowRadius: 3.84,
 	},
 	coverImage: {
-		width: 150,
-		height: 200,
+		width: '100%',
+		height: 160,
 		borderTopLeftRadius: 8,
 		borderTopRightRadius: 8,
+		borderBottomLeftRadius: 8,
+		borderBottomRightRadius: 8,
 	},
 	title: {
 		fontSize: 16,

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 
 import {
 	FlatList,
@@ -20,7 +20,7 @@ import Modal from 'react-native-modal';
 import SearchBar from '../components/SearchBar';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
-import booksReadData from '../data/booksRead.json';
+import booksReadData from '../data/booksReadCopy.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
 import postsData from '../data/postsData.json'
@@ -34,7 +34,7 @@ export default function ProfileScreen() {
 	const [showMore1, setShowMore1] = useState(false);
 	const [showMore2, setShowMore2] = useState(false);
 	const [showMore3, setShowMore3] = useState(false);
-	
+
 	const ellipsisClicked = () => {
 		setModalVisible(true);
 	};
@@ -46,6 +46,10 @@ export default function ProfileScreen() {
 	const hideModal = () => {
 		setModalVisible(false);
 	};
+
+	const booksReadTitles = booksReadData.map(book => book.title);
+	const futureBooksTitles = futureBooksData.map(book => book.title)
+	const mysteryBooksTitles = mysteryBooksData.map(book => book.title)
 	
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
@@ -165,7 +169,7 @@ export default function ProfileScreen() {
 					style={styles.bio}
 				></TextInput>
 
-				<View>
+				{/* <View>
 					<Carousel 
 						carouselData={postsData}
 						title="Posts" 
@@ -173,35 +177,41 @@ export default function ProfileScreen() {
 						toggleShowMore={() => setShowMore0(!showMore0)}
 						posts={true}
 					/>
-				</View>
+				</View> */}
 				<View>
-					<Carousel 
-						carouselData={booksReadData} 
-						title="Books Read"
+					<Carousel
+						carouselData={booksReadTitles}
+						carouselTitle="Books Read"
 						showMore={showMore1}
 						toggleShowMore={() => setShowMore1(!showMore1)}
 						toggleModal={toggleModal}
 						posts={false}
+						titles={true}
+						authorName={false}
 					/>
 				</View>
 				<View>
 					<Carousel
-						carouselData={mysteryBooksData}
-						title="My Favorite Mystery Books"
+						carouselData={mysteryBooksTitles}
+						carouselTitle="Favorite Mystery Books"
 						showMore={showMore2}
 						toggleShowMore={() => setShowMore2(!showMore2)} 
 						toggleModal={toggleModal}
 						posts={false}
+						titles={true}
+						authorName={false}
 					/>
 				</View>
 				<View>
 					<Carousel
-						carouselData={futureBooksData}
-						title="To Be Read"
+						carouselData={futureBooksTitles}
+						carouselTitle="To Be Read"
 						showMore={showMore3}
 						toggleShowMore={() => setShowMore3(!showMore3)}
 						toggleModal={toggleModal} 
 						posts={false}
+						titles={true}
+						authorName={false}
 					/>
 				</View>
 				<Modal isVisible={isModalVisible1} onBackdropPress={() => setModalVisible1(true)}>
@@ -242,6 +252,15 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		alignItems:'flex-end',
 	},
+	profilePicIcon: {
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	selectedProfilePic: {
+		width: 150,
+		height: 150,
+		borderRadius: 150 / 2,
+	},
 	ellipses: {
 		alignSelf: 'flex-end',
 		marginRight: 20
@@ -262,27 +281,10 @@ const styles = StyleSheet.create({
 		width: '100%',
 		alignItems: 'center',
 	},
-	editProfileButton: {
-		width: 'auto',
-		borderRadius: 10,
-	},
-	messageButton: {
-		width: 'auto',
-		borderRadius: 10,
-	},
 	logoutButton: {
 		width: 'auto',
 		borderRadius: 10,
 		alignSelf: 'center',
-	},
-	profilePicIcon: {
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	selectedProfilePic: {
-		width: 150,
-		height: 150,
-		borderRadius: 150 / 2,
 	},
 	closeModal: {
 		position: 'absolute',

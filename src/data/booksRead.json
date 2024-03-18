@@ -1,49 +1,49 @@
 [
 	{
 		"id": "1",
-		"coverImage": "https://cdn.thestorygraph.com/urhm6a8v5j0xhy7bf4jt99ygrb40",
+		"cover": "https://cdn.thestorygraph.com/urhm6a8v5j0xhy7bf4jt99ygrb40",
 		"title": "The Night Circus",
 		"author": "Erin Morgenstern",
 		"description": "The circus arrives without warning. No announcements precede it. It is simply there, when yesterday it was not. Within the black-and-white striped canvas tents is an utterly unique experience full of breathtaking amazements. It is called Le Cirque des Rêves, and it is only open at night."
 	},
 	{
 		"id": "2",
-		"coverImage": "https://m.media-amazon.com/images/I/710rIVUnZ3L._AC_UF1000,1000_QL80_.jpg",
+		"cover": "https://m.media-amazon.com/images/I/710rIVUnZ3L._AC_UF1000,1000_QL80_.jpg",
 		"title": "The Great Gatsby",
 		"author": "F. Scott Fitzgerald",
 		"description": "The story primarily concerns the young and mysterious millionaire Jay Gatsby and his quixotic passion and obsession with the beautiful former debutante Daisy Buchanan."
 	},
 	{
 		"id": "3",
-		"coverImage": "https://m.media-amazon.com/images/I/61ZV40WmEVL._AC_UF1000,1000_QL80_.jpg",
+		"cover": "https://m.media-amazon.com/images/I/61ZV40WmEVL._AC_UF1000,1000_QL80_.jpg",
 		"title": "To Kill a Mockingbird",
 		"author": "Harper Lee",
 		"description": "The unforgettable novel of a childhood in a sleepy Southern town and the crisis of conscience that rocked it."
 	},
 	{
 		"id": "4",
-		"coverImage": "https://m.media-amazon.com/images/I/71Jzezm8CBL._AC_UF1000,1000_QL80_.jpg",
+		"cover": "https://m.media-amazon.com/images/I/71Jzezm8CBL._AC_UF1000,1000_QL80_.jpg",
 		"title": "1984",
 		"author": "George Orwell",
 		"description": "A dystopian social science fiction novel and cautionary tale written by George Orwell, concerning a totalitarian regime that tightens its grip on the citizens of Airstrip One (formerly known as England) through pervasive surveillance, propaganda, and perpetual war."
 	},
 	{
 		"id": "5",
-		"coverImage": "https://m.media-amazon.com/images/I/81HA6TJ5K-L._AC_UF1000,1000_QL80_.jpg",
+		"cover": "https://m.media-amazon.com/images/I/81HA6TJ5K-L._AC_UF1000,1000_QL80_.jpg",
 		"title": "Pride and Prejudice",
 		"author": "Jane Austen",
 		"description": "A novel of manners by Jane Austen, first published in 1813. The story follows the main character Elizabeth Bennet as she deals with issues of manners, upbringing, morality, education, and marriage in the society of the landed gentry of early 19th-century England."
 	},
 	{
 		"id": "6",
-		"coverImage": "https://m.media-amazon.com/images/I/81-6EJJzxvL._AC_UF894,1000_QL80_.jpg",
+		"cover": "https://m.media-amazon.com/images/I/81-6EJJzxvL._AC_UF894,1000_QL80_.jpg",
 		"title": "The Catcher in the Rye",
 		"author": "J.D. Salinger",
 		"description": "The novel details two days in the life of 16-year-old Holden Caulfield after he has been expelled from prep school. Confused and disillusioned, he wanders New York City."
 	},
 	{
 		"id": "7",
-		"coverImage": "https://compote.slate.com/images/52c071f1-64b1-46fc-86e3-c300c07b682d.jpeg?crop=802%2C1203%2Cx0%2Cy0",
+		"cover": "https://compote.slate.com/images/52c071f1-64b1-46fc-86e3-c300c07b682d.jpeg?crop=802%2C1203%2Cx0%2Cy0",
 		"title": "The Hitchhiker's Guide to the Galaxy",
 		"author": "Douglas Adams",
 		"description": "The irreverent and humorous science fiction series created by Douglas Adams. It follows the misadventures of hapless human Arthur Dent after Earth is demolished to make way for an intergalactic freeway."
