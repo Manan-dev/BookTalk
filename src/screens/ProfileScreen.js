@@ -187,6 +187,7 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
+						byAuthor={false}
 						authorName={false}
 					/>
 				</View>
@@ -199,6 +200,7 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
+						byAuthor={false}
 						authorName={false}
 					/>
 				</View>
@@ -211,6 +213,7 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal} 
 						posts={false}
 						titles={true}
+						byAuthor={false}
 						authorName={false}
 					/>
 				</View>

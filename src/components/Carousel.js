@@ -14,6 +14,7 @@ const Carousel = ({
 	toggleModal,
 	posts,
 	titles: books,
+	byAuthor,
 	authorName
 }) => {
 	const navigation = useNavigation();
@@ -68,7 +69,7 @@ const Carousel = ({
 		}
 	};
 
-	const fetchBooksByAuthor = async (author) => {
+	const fetchBooksByAuthor = async (authorName) => {
 		try {
 			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 			let responseData = [];
@@ -77,9 +78,9 @@ const Carousel = ({
 				method: 'GET',
 				url: 'https://books-api7.p.rapidapi.com/books/find/author',
 				params: {
-					fname: author.first_name,
-					lname: author.last_name,
-					mname: author.middle_name // Include middle_name in the params if it exists
+					fname: authorName.first_name,
+					lname: authorName.last_name,
+					mname: authorName.middle_name // Include middle_name in the params if it exists
 				},
 				headers: {
 					'X-RapidAPI-Key': BOOK_API_KEY,
@@ -102,16 +103,20 @@ const Carousel = ({
 	};		
 
 	const handleBookPress = book => {
-		const { title, author, cover, plot, rating, review } = book;
-		navigation.navigate('BookDetailsScreen', { title, author, cover, rating, plot, review });
+		const { title, author, cover, plot, review, rating } = book;
+		navigation.navigate('BookDetailsScreen', { title, author, cover, plot, review, rating });
+		// console.log("carousel: ", review)
 	};
 
 	const renderItem = ({ item }) => (
 		<View style={styles.item}>
-			<Book
-				book={item[0]}
-				onPress={() => handleBookPress(item[0])} // Pass the entire book object
-			/>
+			{item.map((book, index) => (
+				<Book
+					key={index}
+					book={book}
+					onPress={() => handleBookPress(book)}
+				/>
+        	))}
     	</View>
 	);
 
@@ -136,12 +141,12 @@ const Carousel = ({
 		</View>
 	);
 	
-	console.log(booksByTitle)
 	return (
 		<View style={styles.container}>
 			<Text h4 h4Style={{ fontSize: 20, marginBottom: 5 }}>
 				{carouselTitle}
 			</Text>
+			
 			{books === true && (
 				<>
 					<FlatList
@@ -155,7 +160,7 @@ const Carousel = ({
 				</>
 			)}
 
-			{authorName === true && (
+			{byAuthor === true && (
 				<>
 					<FlatList
 						data={booksByAuthor}
@@ -184,6 +189,7 @@ const styles = StyleSheet.create({
 	item: {
 		width: 115,
 		height: 160,
+		borderWidth: 1,
 	},
 	contentTitle: {
 		fontSize: 12,

@@ -5,8 +5,10 @@ import Modal from 'react-native-modal';
 import Carousel from '../components/Carousel';
 
 const BookDetailsScreen = ({ route }) => {
-	const { title, author, cover, plot, rating, review } = route.params;
+	const { title, author, cover, plot, review, rating } = route.params;
 	const [isModalVisible, setModalVisible] = useState(false);
+	
+	console.log("bookdetails:", review)
 
 	const addClicked = () => {
 		setModalVisible(true);
@@ -134,19 +136,17 @@ const BookDetailsScreen = ({ route }) => {
 				<StarRating rating={rating}></StarRating>
 			 	<Text style={styles.plot}>{plot}</Text>
 			</View>
-
+		
 			<View>
 				{/* Add reviews */}
-				{review && review.length > 0 && (
+				<Text>Reviews</Text>
+				{review && (
 				<View style={styles.reviewsContainer}>
 					<View>
-						<Text style={styles.subtitle}>Reviews:</Text>
-						{review.map((review, index) => (
-							<View key={index} style={styles.reviewContainer}>
-								<Text style={styles.reviewName}>{review.name}</Text>
-								<Text style={styles.reviewBody}>{review.body}</Text>
-							</View>
-						))}
+						<View style={styles.reviewContainer}>
+							<Text style={styles.reviewName}>{review.name}</Text>
+							<Text style={styles.reviewBody}>{review.body}</Text>
+						</View>
 					</View>
 				</View>
 				)}
@@ -162,6 +162,7 @@ const BookDetailsScreen = ({ route }) => {
 					toggleModal={null}
 					posts={false}
 					titles={false}
+					byAuthor={true}
 					authorName={author}
 				/>
 			</View>
