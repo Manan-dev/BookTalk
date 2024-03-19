@@ -8,11 +8,13 @@ import {
 	signInWithEmailAndPassword,
 } from 'firebase/auth';
 import {
+	addDoc,
 	collection,
 	doc,
 	getDoc,
 	getDocs,
 	getFirestore,
+	serverTimestamp,
 	setDoc,
 } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
@@ -162,6 +164,25 @@ const Firebase = {
 		} catch (error) {
 			console.error('Error getting posts:', error);
 			return [];
+		}
+	},
+	addCommentToFirestore: async (postId, postCreatorUserId, userId, text) => {
+		try {
+			const commentsRef = collection(
+				db,
+				`users/${postCreatorUserId}/posts/${postId}/comments`
+			);
+			const userInfo = await Firebase.getUserInfo(userId);
+			await addDoc(commentsRef, {
+				userId: userId,
+				text: text,
+				username: userInfo.username,
+				profilePhotoUrl: userInfo.profilePhotoUrl,
+				createdAt: serverTimestamp(),
+			});
+			console.log('Comment added successfully!');
+		} catch (error) {
+			console.error('Error adding comment: ', error);
 		}
 	},
 };

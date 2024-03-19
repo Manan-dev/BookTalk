@@ -55,7 +55,7 @@ const Feed = () => {
 		setModalVisible(true);
 	};
 
-	const addComment = (postId, newComment) => {
+	const addComment = (postId, newComment, postCreatorUserId) => {
 		if (!newComment) return;
 		const currentUserComment = {
 			commentingUsername: user.username,
@@ -66,6 +66,12 @@ const Feed = () => {
 			...prevComments,
 			[postId]: [...(prevComments[postId] || []), currentUserComment],
 		}));
+		firebase.addCommentToFirestore(
+			postId,
+			postCreatorUserId,
+			user.uid,
+			newComment
+		);
 	};
 
 	const addCommentModal = async item => {
@@ -80,6 +86,7 @@ const Feed = () => {
 	const renderItem = ({ item }) => (
 		<Post
 			item={item}
+			postCreatorUserId={item.userId}
 			toggleLike={toggleLike}
 			ellipsisClicked={ellipsisClicked}
 			addCommentModal={addCommentModal}
@@ -88,7 +95,9 @@ const Feed = () => {
 			selectedPost={selectedPost}
 			newComment={newComment}
 			setNewComment={setNewComment}
-			addComment={addComment}
+			addComment={(postId, newComment) =>
+				addComment(postId, newComment, item.userId)
+			}
 			comments={comments[item.id]}
 			user={user}
 			postLikeState={postLikeState}
