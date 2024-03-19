@@ -57,9 +57,14 @@ const Feed = () => {
 
 	const addComment = (postId, newComment) => {
 		if (!newComment) return;
+		const currentUserComment = {
+			commentingUsername: user.username,
+			commentingUserPhotoURL: user.profilePhotoUrl,
+			commentText: newComment,
+		};
 		setComments(prevComments => ({
 			...prevComments,
-			[postId]: [...(prevComments[postId] || []), newComment],
+			[postId]: [...(prevComments[postId] || []), currentUserComment],
 		}));
 	};
 
