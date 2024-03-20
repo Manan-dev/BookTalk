@@ -1,14 +1,16 @@
-import React, {useState} from 'react';
-import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity } from 'react-native';
+import React, {useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
-import Carousel from '../components/Carousel';
+import axios from 'axios';
+import {BOOK_API_KEY} from '@env';
 
 const BookDetailsScreen = ({ route }) => {
+	const navigation = useNavigation();
 	const { title, author, cover, plot, review, rating } = route.params;
 	const [isModalVisible, setModalVisible] = useState(false);
-	
-	console.log("bookdetails:", review)
+	const [booksByAuthor, setBooksByAuthor] = useState([]);
 
 	const addClicked = () => {
 		setModalVisible(true);
@@ -20,6 +22,51 @@ const BookDetailsScreen = ({ route }) => {
 
 	const hideModal = () => {
 		setModalVisible(false);
+	};
+
+	useEffect(() => {
+       fetchBooksByAuthor(author);
+    }, [author]);
+
+	const fetchBooksByAuthor = async (author) => {
+		try {
+			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+			let responseData = [];
+			
+			const options = {
+				method: 'GET',
+				url: 'https://books-api7.p.rapidapi.com/books/find/author',
+				params: {
+					fname: author.first_name,
+					lname: author.last_name,
+					mname: author.middle_name // Include middle_name in the params if it exists
+				},
+				headers: {
+					'X-RapidAPI-Key': BOOK_API_KEY,
+					'X-RapidAPI-Host': 'books-api7.p.rapidapi.com'
+				}
+			};
+	
+			try {
+				const response = await axios.request(options);
+				responseData.push(response.data); // Accumulate responses
+			} catch (error) {
+				console.error(error);
+			}
+			
+			console.log("bookdetails", responseData[0].slice(0, 4).length)
+
+			setBooksByAuthor(responseData[0].slice(0, 3)); // Update state with all responses
+		} catch (error) {
+			console.error(error);
+			setBooksByAuthor([]); // Update state in case of error
+		}
+	};
+
+	const handleBookPress = book => {
+		const { title, author, cover, plot, review, rating } = book;
+		navigation.navigate('BookDetailsScreen', { title, author, cover, plot, review, rating });
+		// console.log("carousel: ", review)
 	};
 
 	const renderDropdownOptions = () => {
@@ -139,9 +186,9 @@ const BookDetailsScreen = ({ route }) => {
 		
 			<View>
 				{/* Add reviews */}
-				<Text>Reviews</Text>
 				{review && (
 				<View style={styles.reviewsContainer}>
+					<Text style={styles.reviewsSubheading}>Reviews</Text>
 					<View>
 						<View style={styles.reviewContainer}>
 							<Text style={styles.reviewName}>{review.name}</Text>
@@ -152,19 +199,16 @@ const BookDetailsScreen = ({ route }) => {
 				)}
 			</View>
 
-			<View>
+			<Text style={styles.moreBooksSubheading}>More Books By This Author</Text>
+			<View style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
 				{/* Add more books by this author */}
-				<Carousel
-					carouselData={null}
-					carouselTitle="More Books by This Author"
-					showMore={null}
-					toggleShowMore={null} 
-					toggleModal={null}
-					posts={false}
-					titles={false}
-					byAuthor={true}
-					authorName={author}
-				/>
+				{booksByAuthor.map((book, index) => (
+					<View key={index}>
+						<TouchableOpacity onPress={() => handleBookPress(book)}>
+							<Image source={{ uri: book.cover }} style={styles.moreBooksImage} />
+						</TouchableOpacity>
+					</View>
+					))}
 			</View>
 		</ScrollView>
 	);
@@ -209,6 +253,15 @@ const styles = StyleSheet.create({
 		height: 300,
 		marginTop: 200,
 	},
+	moreBooksImage: {
+		height: 180,
+		aspectRatio: 2/3,
+		borderTopLeftRadius: 8,
+		borderTopRightRadius: 8,
+		borderBottomLeftRadius: 8,
+		borderBottomRightRadius: 8,
+		marginRight: 10,
+	},
 	detailsContainer: {
 		alignItems: 'center',
 		marginTop: 160,
@@ -230,12 +283,38 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		paddingTop: 20,
 	},
-	reviewsContainer: {
-
+	moreBooksSubheading: {
+		fontSize: 22,
+		fontWeight: 'bold',
+		marginBottom: 10,
+		marginTop: 25,
+		marginLeft: 5,
 	},
-	reviews: {
-
-	}
+	reviewsSubheading: {
+		fontSize: 22,
+		fontWeight: 'bold',
+		marginBottom: 10,
+		marginTop: 25,
+	},
+	reviewsContainer: {
+		marginLeft: 5,
+	},
+	reviewName: {
+		fontWeight: 'bold',
+		fontSize: 15,
+		marginLeft: 5,
+	},
+	reviewBody: {
+		marginLeft: 5,
+		marginRight: 10,
+		backgroundColor: '#dbdad7',
+		textAlign: 'justify'
+	},
+	item: {
+		width: 115,
+		height: 160,
+		borderWidth: 1,
+	},
 });
 
 export default BookDetailsScreen;

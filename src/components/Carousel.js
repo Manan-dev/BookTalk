@@ -14,14 +14,9 @@ const Carousel = ({
 	toggleModal,
 	posts,
 	titles: books,
-	byAuthor,
-	authorName
 }) => {
 	const navigation = useNavigation();
 	const [booksByTitle, setBooksByTitle] = useState([]);
-	const [booksByAuthor, setBooksByAuthor] = useState([]);
-	
-	// console.log("carousel: ", authorName)
 	
 	useEffect(() => {
         if (carouselData) {
@@ -30,13 +25,6 @@ const Carousel = ({
         }
     }, [carouselData]);
 
-	useEffect(() => {
-        if (authorName) {
-            // Fetch books by the author here
-			// console.log(authorName)
-            fetchBooksByAuthor(authorName);
-        }
-    }, [authorName]);
 
 	const fetchBooksByTitles = async (titles) => {
 		try {
@@ -67,45 +55,11 @@ const Carousel = ({
 		  console.error(error);
 		  setBooksByTitle([]); // Update state in case of error
 		}
-	};
-
-	const fetchBooksByAuthor = async (authorName) => {
-		try {
-			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-			let responseData = [];
-			
-			const options = {
-				method: 'GET',
-				url: 'https://books-api7.p.rapidapi.com/books/find/author',
-				params: {
-					fname: authorName.first_name,
-					lname: authorName.last_name,
-					mname: authorName.middle_name // Include middle_name in the params if it exists
-				},
-				headers: {
-					'X-RapidAPI-Key': BOOK_API_KEY,
-					'X-RapidAPI-Host': 'books-api7.p.rapidapi.com'
-				}
-			};
-	
-			try {
-				const response = await axios.request(options);
-				responseData.push(response.data); // Accumulate responses
-			} catch (error) {
-				console.error(error);
-			}
-			
-			setBooksByAuthor(responseData); // Update state with all responses
-		} catch (error) {
-			console.error(error);
-			setBooksByAuthor([]); // Update state in case of error
-		}
-	};		
+	};	
 
 	const handleBookPress = book => {
 		const { title, author, cover, plot, review, rating } = book;
 		navigation.navigate('BookDetailsScreen', { title, author, cover, plot, review, rating });
-		// console.log("carousel: ", review)
 	};
 
 	const renderItem = ({ item }) => (
@@ -116,7 +70,7 @@ const Carousel = ({
 					book={book}
 					onPress={() => handleBookPress(book)}
 				/>
-        	))}
+			))}
     	</View>
 	);
 
@@ -159,18 +113,6 @@ const Carousel = ({
       			{booksByTitle.length > 5 && renderShowMoreButton()}
 				</>
 			)}
-
-			{byAuthor === true && (
-				<>
-					<FlatList
-						data={booksByAuthor}
-						renderItem={renderItem}
-						keyExtractor={(item, index) => index.toString()}
-						horizontal
-						showsHorizontalScrollIndicator={false}
-					/>
-				</>
-        	)}
 		</View>
 	);
 };
@@ -189,7 +131,6 @@ const styles = StyleSheet.create({
 	item: {
 		width: 115,
 		height: 160,
-		borderWidth: 1,
 	},
 	contentTitle: {
 		fontSize: 12,

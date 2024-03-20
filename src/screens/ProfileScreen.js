@@ -187,8 +187,6 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
-						byAuthor={false}
-						authorName={false}
 					/>
 				</View>
 				<View>
@@ -200,8 +198,6 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
-						byAuthor={false}
-						authorName={false}
 					/>
 				</View>
 				<View>
@@ -213,8 +209,6 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal} 
 						posts={false}
 						titles={true}
-						byAuthor={false}
-						authorName={false}
 					/>
 				</View>
 				<Modal isVisible={isModalVisible1} onBackdropPress={() => setModalVisible1(true)}>
