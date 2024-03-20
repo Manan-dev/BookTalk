@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, FlatList, Image, TextInput} from 'react-native';
+// import { collection, addDoc, getDocs, onSnapshot } from '@react-native-firebase/firestore';
+import { FirebaseContext } from '../context/FirebaseContext';
 import { Feather, Ionicons } from '@expo/vector-icons';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import profileImage from '../../assets/profile.png';
+// import { Firestore } from 'firebase/firestore';
 
-const MessageScreen = () => {
+const Stack = createStackNavigator();
+
+const MessageScreen = ({ navigation }) => {
+
+	// State for search input value
+	const [SearchInput, setSearchInput] = useState('');
+
+	// State to manage the edit mode
+	const [editMode, setEditMode] = useState(false);
+
+	const firebase = React.useContext(FirebaseContext);
+
 	// Sample data for user chats
-	const userData = [
+	const [userData, setUserData] = useState([
 		{ id: '1', name: 'Selena', message: 'Looking for a good fantasy series. Any suggetions?', pinned: false },
 		{ id: '2', name: 'Tia', message: 'Lost in the magical world of "Harry Potter" again.', pinned: false },
 		{ id: '3', name: 'Katie', message: 'Any book recommendations for the weekend?', pined: false},
@@ -15,33 +31,27 @@ const MessageScreen = () => {
 		{ id: '7', name: 'Rue', message: 'Just finished an amazing book!', pined: false},
 		{ id: '8', name: 'Erika', message: 'Currently reading a gripping thriller.', pined: false},
 		// Add more user data as needed
-	];
+	]);
 
-	// State to manage pinned user
-	const [pinnedUser, setPinnedUser] = useState(null);
 
-	// Function to handle pinning a user
-	const handlePinUser = (userId) => {
-		setPinnedUser(userId);
-	};
-
-	// State for search input value
-	const [SearchInput, setSearchInput] = useState('');
+	// Function to handle delete chat
+	const handlleDeleteChat = (userId) => {
+		const updatedData = userData.filter((user) => user.id !== userId);
+		setUserData(updatedData);
+	}
 
 	// Filtered user data based on search input
 	const filteredUserData = userData.filter(
 		(user) => user.name.toLowerCase().includes(SearchInput.toLowerCase())
 	);
 
-
-
 	return (
 		<View style={styles.container}>
 		
 			{/* Header with Edit and New Message icons */}
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => console.log('Edit button pressed')}>
-					<Text style={styles.edit}>Edit</Text>
+				<TouchableOpacity onPress={() => setEditMode(!editMode)}>
+					<Text style={styles.edit}>{editMode ? 'Done' : 'Edit'}</Text>
 				</TouchableOpacity>
 
 				<Text style={styles.boldText}>Messages</Text>
@@ -63,33 +73,93 @@ const MessageScreen = () => {
 				/>
 			</View>
 
+
 			{/* List of user chats */}
 			<FlatList
 				data={filteredUserData}
 				keyExtractor={(item) => item.id}
 				renderItem={({ item }) => (
 				<TouchableOpacity
-					style={[
-					styles.chatContainer,
-					pinnedUser === item.id && styles.pinnedChatContainer,
-					]}
-					onPress={() => console.log(`Chat with ${item.name} pressed`)}
-					onLongPress={() => handlePinUser(item.id)}
+					style={styles.chatContainer}
+					onPress={() => navigation.navigate('ChatScreen', {userId: item.id, userName: item.name})}
 				>
 					{/* User profile image on the left */}
 					<Image source={profileImage} style={styles.profileImage} />
 
 					{/* User information and message */}
 					<View style={styles.userInfo}>
-					<Text style={styles.userName}>{item.name}</Text>
-					<Text style={styles.userMessage}>{item.message}</Text>
+						<Text style={styles.userName}>{item.name}</Text>
+						<Text style={styles.userMessage}>{item.message}</Text>
 					</View>
+
+					{/* Delete icon for edit mode */}
+					{ editMode && (
+						<TouchableOpacity onPress={() => handlleDeleteChat(item.id)}>
+							<Feather name="trash-2" size={20} color="red" />
+						</TouchableOpacity>
+					)}
 				</TouchableOpacity>
 				)}
 			/>
 		</View>
 	);
 };
+
+const ChatScreen = ({ route, navigation }) => {
+	const { userId, userName, messages: initialMessages } = route.params;
+
+	// State for the message input
+	const [messageInput, setMessageInput ] = useState('');
+
+	const [messages, setMessages] = useState(initialMessages || []);
+	
+	// Funciton to handle sending messages
+	const handleSendMessage = async () => {
+		console.log('Sending message to ${userName}: ${messageInput}');
+	};
+
+
+	return (
+		<View style={styles.container}>
+			{/* Header with back arrow and user name */}
+			<View style={styles.header}>
+				<TouchableOpacity onPress={() => navigation.goBack()}>
+					<Ionicons name="arrow-back" size={20} style={styles.icon}/>
+				</TouchableOpacity>
+				<Text style={styles.boldText}>{userName}</Text>
+			</View>
+
+			{/* Messages list */}
+			<FlatList
+				data={messages}
+				keyExtractor={(item, index) => index.toString()}
+				renderItem={({ item }) => (
+					<View>
+						<Text>{item.text}</Text>
+						{/* Display sender, timestamp, etc. as needed */}
+					</View>
+				)}			
+			/>
+			
+			{/* Implement messages UI here */}
+
+			{/* Message input */}
+			<View style={styles.messageInputContainer}>
+				<TextInput
+					style={styles.messageInput}
+					placeholder="Type a message..."
+					value={messageInput}
+					onChangeText={(text) => setMessageInput(text)}
+				/>
+
+				<TouchableOpacity onPress={handleSendMessage}>
+					<Ionicons name="send" size={20} style={styles.icon}/>
+				</TouchableOpacity>
+			</View>
+		</View>
+
+	)
+}
 
 const styles = StyleSheet.create({
 	container: {
@@ -143,9 +213,6 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: '#ccc',
 	},
-	pinnedChatContainer: {
-		backgroundColor: '#e6e6e6',
-	},
 	profileImage: {
 		width: 50,
 		height: 50,
@@ -162,6 +229,30 @@ const styles = StyleSheet.create({
 	userMessage: {
 		color: '#888',
 	},
+	messageInputContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		bottom: 15,
+		padding: 10,
+		borderTopWidht:1,
+		borderTopColor: '#ccc',
+	},
+	messageInput: {
+		flex: 1,
+		height: 40,
+		marginRight: 10, 
+		borderColor: '#ccc',
+		borderWidth: 1,
+		borderRadius: 10,
+		paddingHorizontal: 10,
+	},
 });
 
-export default MessageScreen;
+
+export default () => (
+	<Stack.Navigator>
+		<Stack.Screen name="MessageScreen" component={MessageScreen} options={{ headerShown: false}} />
+		<Stack.Screen name="ChatScreen" component={ChatScreen} options={{ headerShown: false}}/>
+	</Stack.Navigator>
+	
+);
