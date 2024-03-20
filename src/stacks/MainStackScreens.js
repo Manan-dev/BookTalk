@@ -6,8 +6,8 @@ import CustomHeader from '../components/CustomHeader';
 import CreatePostScreen from '../screens/CreatePostScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
-import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
+import ProfileStackNavigator from './ProfileStackNavigator';
 
 export default MainStackScreens = () => {
 	const MainStack = createBottomTabNavigator();
@@ -61,8 +61,8 @@ export default MainStackScreens = () => {
 				}}
 			/>
 			<MainStack.Screen
-				name="Profile"
-				component={ProfileScreen}
+				name="ProfileStack"
+				component={ProfileStackNavigator}
 				options={{
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="ios-person" color={color} size={size} />
