@@ -142,6 +142,8 @@ const styles = StyleSheet.create({
 		width: '110%',
 		backgroundColor: '#fff',
 		padding: 16,
+		marginTop: 275,
+		marginBottom: 80,
 	},
 	commentInputContainer: {
 		display: 'flex',

@@ -1,29 +1,29 @@
 import React from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, View } from 'react-native';
 
 const Comment = ({ comments, currentUser }) => {
-	return (
-		<View>
-			{comments &&
-				comments.map((comment, index) => (
-					<View key={index} style={styles.comment}>
-						<Image
-							source={{
-								uri:
-									comment.commentingUserPhotoURL ||
-									'https://via.placeholder.com/150',
-							}}
-							style={styles.commentsProfilePic}
-						/>
-						<View style={styles.commentContent}>
-							<Text style={styles.commentUsername}>
-								{comment.commentingUsername}:
-							</Text>
-							<Text style={styles.commentText}> {comment.commentText}</Text>
-						</View>
-					</View>
-				))}
+	const renderCommentItem = ({ item }) => (
+		<View style={styles.comment}>
+			<Image
+				source={{
+					uri: item.commentingUserPhotoURL || 'https://via.placeholder.com/150',
+				}}
+				style={styles.commentsProfilePic}
+			/>
+			<View style={styles.commentContent}>
+				<Text style={styles.commentUsername}>{item.commentingUsername}:</Text>
+				<Text style={styles.commentText}> {item.commentText}</Text>
+			</View>
 		</View>
+	);
+
+	return (
+		<FlatList
+			data={comments}
+			renderItem={renderCommentItem}
+			keyExtractor={(item, index) => index.toString()}
+			style={styles.container}
+		/>
 	);
 };
 
