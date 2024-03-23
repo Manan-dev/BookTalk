@@ -34,6 +34,12 @@ const Feed = () => {
 					commentsObj[post.id] = post.comments || [];
 				});
 				setComments(commentsObj);
+				// Set postLikeState based on isLikedByCurrentUser
+				const likeState = fetchedPosts.reduce((state, post) => {
+					state[post.id] = post.isLikedByCurrentUser;
+					return state;
+				}, {});
+				setPostLikeState(likeState);
 			} catch (error) {
 				console.error('Error fetching posts:', error);
 			} finally {
@@ -43,11 +49,28 @@ const Feed = () => {
 		fetchPosts();
 	}, []);
 
-	const toggleLike = postId => {
+	const toggleLike = async (postId, postCreatorUserId) => {
+		const isLiked = postLikeState[postId];
 		setPostLikeState(prevState => ({
 			...prevState,
-			[postId]: !prevState[postId] || false,
+			[postId]: !isLiked || false,
 		}));
+
+		if (isLiked) {
+			// If the post is currently liked, remove the like entry from the database
+			await firebase.removeLikedPostFromFirestore(
+				postId,
+				postCreatorUserId,
+				user.uid
+			);
+		} else {
+			// If the post is currently unliked, add the like entry to the database
+			await firebase.addLikedPostToFirestore(
+				postId,
+				postCreatorUserId,
+				user.uid
+			);
+		}
 	};
 
 	const ellipsisClicked = item => {
@@ -87,7 +110,7 @@ const Feed = () => {
 		<Post
 			item={item}
 			postCreatorUserId={item.userId}
-			toggleLike={toggleLike}
+			toggleLike={postId => toggleLike(postId, item.userId)}
 			ellipsisClicked={ellipsisClicked}
 			addCommentModal={addCommentModal}
 			commentModalVisible={commentModalVisible}

@@ -10,12 +10,15 @@ import {
 import {
 	addDoc,
 	collection,
+	deleteDoc,
 	doc,
 	getDoc,
 	getDocs,
 	getFirestore,
+	query,
 	serverTimestamp,
 	setDoc,
+	where,
 } from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
@@ -143,12 +146,21 @@ const Firebase = {
 							commentText: commentDoc.data().text,
 						}));
 
+						const likesCollection = collection(postDoc.ref, 'likes');
+						const likeQuery = query(
+							likesCollection,
+							where('userId', '==', Firebase.getCurrentUser().uid)
+						);
+						const likeSnapshot = await getDocs(likeQuery);
+						const isLikedByCurrentUser = !likeSnapshot.empty;
+
 						return {
 							id: postDoc.id,
 							userId: userDoc.id,
 							profilePhotoUrl,
 							username,
 							comments,
+							isLikedByCurrentUser,
 							...postDoc.data(),
 						};
 					})
@@ -183,6 +195,42 @@ const Firebase = {
 			console.log('Comment added successfully!');
 		} catch (error) {
 			console.error('Error adding comment: ', error);
+		}
+	},
+	addLikedPostToFirestore: async (postId, postCreatorUserId, userId) => {
+		try {
+			const likesRef = collection(
+				db,
+				`users/${postCreatorUserId}/posts/${postId}/likes`
+			);
+			const userInfo = await Firebase.getUserInfo(userId);
+			await addDoc(likesRef, {
+				userId: userId,
+				likedAt: serverTimestamp(),
+				username: userInfo.username,
+			});
+			console.log('Liked post added to database.', userId, postId);
+		} catch (error) {
+			console.error('Error adding liked post to database:', error);
+		}
+	},
+	removeLikedPostFromFirestore: async (postId, postCreatorUserId, userId) => {
+		try {
+			const likesRef = collection(
+				db,
+				`users/${postCreatorUserId}/posts/${postId}/likes`
+			);
+
+			// Query the like entry by userId and delete it
+			const querySnapshot = await getDocs(
+				query(likesRef, where('userId', '==', userId))
+			);
+			querySnapshot.forEach(async doc => {
+				await deleteDoc(doc.ref);
+				console.log('Like removed from database.', userId, postId);
+			});
+		} catch (error) {
+			console.error('Error removing like from database:', error);
 		}
 	},
 };
