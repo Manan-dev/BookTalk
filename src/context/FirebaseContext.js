@@ -7,7 +7,15 @@ import {
 	initializeAuth,
 	signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import {
+	addDoc,
+	collection,
+	doc,
+	getDoc,
+	getFirestore,
+	onSnapshot,
+	setDoc,
+} from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
@@ -109,6 +117,50 @@ const Firebase = {
 		}
 		return false;
 	},
+	sendMessage: async (recipientId, recipientName, message) => {
+		try {
+			const senderId = Firebase.getCurrentUser().uid;
+			const chatId = generateChatId(senderId, recipientId);
+			const userInfo = await Firebase.getUserInfo(senderId);
+
+			await addDoc(collection(db, 'chats', chatId), {
+				senderId,
+				recipientId,
+				senderName: userInfo.username,
+				message,
+				recipientName,
+				timestamp: new Date(),
+			});
+			console.log('Message sent from:', senderId, 'to:', recipientId);
+		} catch (error) {
+			console.log('Error @sendMessage: ', error.message);
+		}
+	},
+	getMessagesFromFirestore: (recipientId, setMessages) => {
+		const senderId = Firebase.getCurrentUser().uid;
+		const chatId = generateChatId(senderId, recipientId);
+
+		return onSnapshot(collection(db, 'chats', chatId), snapshot => {
+			const messages = [];
+			snapshot.forEach(doc => {
+				const data = doc.data();
+				messages.push({
+					id: doc.id,
+					senderId: data.senderId,
+					message: data.message,
+					senderName: data.senderName,
+					timestamp: data.timestamp.toDate(), // Convert Firestore Timestamp to JavaScript Date
+				});
+			});
+			setMessages(messages);
+		});
+	},
+};
+
+const generateChatId = (userId1, userId2) => {
+	return userId1 < userId2
+		? `chats/${userId1}_${userId2}`
+		: `chats/${userId2}_${userId1}`;
 };
 
 const FirebaseProvider = props => {
