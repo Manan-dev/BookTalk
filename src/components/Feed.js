@@ -135,12 +135,6 @@ const Feed = () => {
 		<View style={styles.dropdownContainer}>
 			<TouchableOpacity
 				style={styles.dropdownOption}
-				onPress={() => console.log('Unfollow clicked')}
-			>
-				<Text>Unfollow</Text>
-			</TouchableOpacity>
-			<TouchableOpacity
-				style={styles.dropdownOption}
 				onPress={() => console.log('Share clicked')}
 			>
 				<Text>Share</Text>
@@ -176,7 +170,7 @@ const styles = StyleSheet.create({
 	},
 	dropdownContainer: {
 		backgroundColor: 'white',
-		padding: 16,
+		padding: 8,
 		borderRadius: 8,
 	},
 	dropdownOption: {
