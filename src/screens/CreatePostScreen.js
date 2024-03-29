@@ -1,10 +1,12 @@
 import { BOOK_API_KEY } from '@env';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
 import {
 	Image,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -51,6 +53,7 @@ export default function CreatePostScreen() {
 		// Handle posting logic here
 		console.log('Post:', postText);
 		console.log('Media:', media);
+		console.log('Merged Results:', mergedResults);
 		setPostText('');
 		setMedia(null);
 		// navigate to previous screen
@@ -86,6 +89,10 @@ export default function CreatePostScreen() {
 		}
 	};
 
+	const mergedResults = [
+		...(searchResults.map(result => result.cover) || []),
+		...(media || []),
+	];
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -108,33 +115,20 @@ export default function CreatePostScreen() {
 						value={postText}
 						multiline
 					/>
-					{/* <TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
-						<MaterialIcons name="add-a-photo" size={24} color="white" />
-					</TouchableOpacity> */}
+					<TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
+						<Ionicons name="image-outline" size={24} color="white" />
+					</TouchableOpacity>
 					<View style={styles.searchBar}>
 						<SearchBar onSearch={handleSearch} />
 					</View>
 				</View>
-				{/* {media && (
-					<ScrollView horizontal>
-						{media.map((uri, index) => (
-							<Image
-								key={index}
-								source={{ uri: uri }}
-								style={styles.mediaPreview}
-							/>
-						))}
-					</ScrollView>
-				)} */}
-				{/* Display search results[0] - because only one book will be searched */}
-				{searchResults.length > 0 && (
-					<TouchableOpacity>
-						<Image
-							source={{ uri: searchResults[0].cover }}
-							style={styles.bookPreview}
-						/>
-					</TouchableOpacity>
-				)}
+				<ScrollView horizontal>
+					{mergedResults.map((item, index) => (
+						<TouchableOpacity key={index} onPress={() => console.log(item)}>
+							<Image source={{ uri: item }} style={styles.mediaPreview} />
+						</TouchableOpacity>
+					))}
+				</ScrollView>
 			</View>
 		</View>
 	);
@@ -196,15 +190,8 @@ const styles = StyleSheet.create({
 		marginLeft: 10,
 	},
 	mediaPreview: {
-		position: 'absolute',
-		bottom: 20,
+		bottom: -10,
 		left: 10,
-		width: 120,
-		height: 200,
-		borderRadius: 10,
-		marginRight: 10,
-	},
-	bookPreview: {
 		width: 120,
 		height: 200,
 		borderRadius: 10,
