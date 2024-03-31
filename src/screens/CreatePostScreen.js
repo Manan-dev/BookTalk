@@ -52,10 +52,6 @@ export default function CreatePostScreen() {
 	};
 
 	const handlePost = async () => {
-		// Handle posting logic here
-		console.log('Post:', postText);
-		console.log('Media:', media);
-		console.log('Merged Results:', mergedResults);
 		await firebase.addPostForCurrentUser(postText, mergedResults);
 
 		setPostText('');
