@@ -42,7 +42,15 @@ const Post = ({
 					</TouchableOpacity>
 				</View>
 			</View>
-			<Image source={{ uri: item.imageURL }} style={styles.postImage} />
+
+			{item.imageURL ? (
+				<Image source={{ uri: item.imageURL }} style={styles.postImage} />
+			) : (
+				<Image
+					source={{ uri: 'https://via.placeholder.com/150' }}
+					style={styles.postImage}
+				/>
+			)}
 			<View style={styles.heartButton}>
 				<TouchableOpacity onPress={() => toggleLike(item.id)}>
 					{postLikeState[item.id] ? (
