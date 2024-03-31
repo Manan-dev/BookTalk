@@ -124,14 +124,36 @@ const Firebase = {
 			// Get the current user's ID
 			const currentUserId = currentUser.uid;
 
+			const uploadTasks = [];
+
+			// Iterate over each item in mergedResults
+			for (const item of mergedResults) {
+				// Check if the item contains media
+				if (item.media) {
+					// Iterate over each media URI in the item
+					for (const mediaUri of item.media) {
+						const nameOfFile = mediaUri.split('/').pop();
+						const mediaRef = ref(
+							storage,
+							`media/${currentUserId}/${nameOfFile}`
+						);
+						const photo = await Firebase.getBlob(mediaUri);
+						// Start the upload task and store the promise
+						const uploadTask = uploadBytes(mediaRef, photo).then(() => {
+							return getDownloadURL(mediaRef);
+						});
+						uploadTasks.push(uploadTask);
+					}
+				}
+			}
+
+			// Wait for all upload tasks to complete
+			const mediaUrls = await Promise.all(uploadTasks);
+
 			// Create a new post object
 			const newPost = {
 				caption: postText || '',
-				media:
-					mergedResults
-						.filter(item => item.media)
-						.map(result => result.media)
-						.flat() || [],
+				media: mediaUrls,
 				book: mergedResults[0]?.book || '',
 			};
 
