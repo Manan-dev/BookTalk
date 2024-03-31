@@ -3,7 +3,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import {
 	Image,
 	ScrollView,
@@ -14,13 +14,15 @@ import {
 	View,
 } from 'react-native';
 import SearchBar from '../components/SearchBar';
+import { FirebaseContext } from '../context/FirebaseContext';
 
 export default function CreatePostScreen() {
 	const [searchResults, setSearchResults] = useState([]);
 	const [postText, setPostText] = useState('');
-	const [media, setMedia] = useState(null);
+	const [media, setMedia] = useState([]);
 	const navigation = useNavigation();
 	const [search, setSearch] = useState('');
+	const firebase = useContext(FirebaseContext);
 
 	const handleSearch = async query => {
 		// Update the searchQuery state
@@ -49,13 +51,18 @@ export default function CreatePostScreen() {
 		}
 	};
 
-	const handlePost = () => {
+	const handlePost = async () => {
 		// Handle posting logic here
 		console.log('Post:', postText);
 		console.log('Media:', media);
 		console.log('Merged Results:', mergedResults);
+		await firebase.addPostForCurrentUser(postText, mergedResults);
+
 		setPostText('');
-		setMedia(null);
+		setMedia([]);
+		setSearch('');
+		setSearchResults([]);
+
 		// navigate to previous screen
 		navigation.goBack();
 	};
@@ -81,8 +88,10 @@ export default function CreatePostScreen() {
 				const selectedAssets = pickerResult.assets;
 				// Map the selected assets to their URIs
 				const mediaUris = selectedAssets.map(asset => asset.uri);
-				// Update state with the array of URIs
-				setMedia(mediaUris);
+				// Construct the object with key "media" and URIs in an array
+				const mediaObject = { media: mediaUris };
+				// Update state with the media object
+				setMedia(prevMedia => [...prevMedia, mediaObject]);
 			}
 		} catch (error) {
 			console.error('Error picking media:', error);
@@ -90,9 +99,10 @@ export default function CreatePostScreen() {
 	};
 
 	const mergedResults = [
-		...(searchResults.map(result => result.cover) || []),
+		...(searchResults.map(result => ({ book: result.cover })) || []),
 		...(media || []),
 	];
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
@@ -125,7 +135,22 @@ export default function CreatePostScreen() {
 				<ScrollView horizontal>
 					{mergedResults.map((item, index) => (
 						<TouchableOpacity key={index} onPress={() => console.log(item)}>
-							<Image source={{ uri: item }} style={styles.mediaPreview} />
+							{Array.isArray(item.media) ? (
+								<View style={styles.imageContainer}>
+									{item.media.map((uri, idx) => (
+										<Image
+											key={idx}
+											source={{ uri }}
+											style={styles.mediaPreview}
+										/>
+									))}
+								</View>
+							) : (
+								<Image
+									source={{ uri: item.book }}
+									style={styles.mediaPreview}
+								/>
+							)}
 						</TouchableOpacity>
 					))}
 				</ScrollView>
@@ -188,6 +213,9 @@ const styles = StyleSheet.create({
 	buttonText: {
 		color: 'white',
 		marginLeft: 10,
+	},
+	imageContainer: {
+		flexDirection: 'row',
 	},
 	mediaPreview: {
 		bottom: -10,

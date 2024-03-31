@@ -7,7 +7,14 @@ import {
 	initializeAuth,
 	signInWithEmailAndPassword,
 } from 'firebase/auth';
-import { doc, getDoc, getFirestore, setDoc } from 'firebase/firestore';
+import {
+	addDoc,
+	collection,
+	doc,
+	getDoc,
+	getFirestore,
+	setDoc,
+} from 'firebase/firestore';
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
@@ -108,6 +115,38 @@ const Firebase = {
 			console.log('Error @logOut: ', error.message);
 		}
 		return false;
+	},
+	addPostForCurrentUser: async (postText, mergedResults) => {
+		try {
+			// Get the current user
+			const currentUser = Firebase.getCurrentUser();
+
+			// Get the current user's ID
+			const currentUserId = currentUser.uid;
+
+			// Create a new post object
+			const newPost = {
+				caption: postText || '',
+				media:
+					mergedResults
+						.filter(item => item.media)
+						.map(result => result.media)
+						.flat() || [],
+				book: mergedResults[0]?.book || '',
+			};
+
+			// Add the new post document to the 'posts' subcollection of the current user
+			const docRef = await addDoc(
+				collection(db, `users/${currentUserId}/posts`),
+				newPost
+			);
+
+			await addDoc(collection(docRef, 'comments'), {});
+			await addDoc(collection(docRef, 'likes'), {});
+			console.log('Post added with ID: ', docRef.id);
+		} catch (error) {
+			console.error('Error adding post: ', error);
+		}
 	},
 };
 
