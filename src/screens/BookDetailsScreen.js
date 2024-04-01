@@ -1,6 +1,6 @@
 import React, {useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity, FlatList } from 'react-native';
+import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity, Button, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
 import axios from 'axios';
@@ -11,6 +11,7 @@ const BookDetailsScreen = ({ route }) => {
 	const { title, author, cover, plot, review, rating } = route.params;
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [booksByAuthor, setBooksByAuthor] = useState([]);
+	const [showFullReview, setShowFullReview] = useState(false);
 
 	const addClicked = () => {
 		setModalVisible(true);
@@ -53,9 +54,7 @@ const BookDetailsScreen = ({ route }) => {
 			} catch (error) {
 				console.error(error);
 			}
-			
-			console.log("bookdetails", responseData[0].slice(0, 4).length)
-
+	
 			setBooksByAuthor(responseData[0].slice(0, 3)); // Update state with all responses
 		} catch (error) {
 			console.error(error);
@@ -66,7 +65,6 @@ const BookDetailsScreen = ({ route }) => {
 	const handleBookPress = book => {
 		const { title, author, cover, plot, review, rating } = book;
 		navigation.navigate('BookDetailsScreen', { title, author, cover, plot, review, rating });
-		// console.log("carousel: ", review)
 	};
 
 	const renderDropdownOptions = () => {
@@ -192,7 +190,14 @@ const BookDetailsScreen = ({ route }) => {
 					<View>
 						<View style={styles.reviewContainer}>
 							<Text style={styles.reviewName}>{review.name}</Text>
-							<Text style={styles.reviewBody}>{review.body}</Text>
+							<Text style={styles.reviewBody}>
+								{showFullReview ? review.body : `${review.body.slice(0, review.body.length / 3)}...`}
+							</Text>
+							{!showFullReview ? (
+							<Button title="Show More" onPress={() => setShowFullReview(true)} />
+							) : (
+							<Button title="Show Less" onPress={() => setShowFullReview(false)} />
+							)}
 						</View>
 					</View>
 				</View>
