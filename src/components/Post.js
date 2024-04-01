@@ -9,6 +9,7 @@ import {
 	View,
 } from 'react-native';
 import Modal from 'react-native-modal';
+import Swiper from 'react-native-swiper';
 import Comment from './Comment';
 
 const Post = ({
@@ -26,6 +27,7 @@ const Post = ({
 	user,
 	postLikeState,
 }) => {
+	const shouldShowArrows = item.imageURL && item.book;
 	return (
 		<View style={styles.postContainer}>
 			<View style={styles.topContainer}>
@@ -43,14 +45,41 @@ const Post = ({
 				</View>
 			</View>
 
-			{item.imageURL ? (
-				<Image source={{ uri: item.imageURL }} style={styles.postImage} />
-			) : (
-				<Image
-					source={{ uri: 'https://via.placeholder.com/150' }}
-					style={styles.postImage}
-				/>
-			)}
+			<Swiper
+				style={styles.swiperContainer}
+				showsButtons={shouldShowArrows}
+				loop
+				showsPagination={shouldShowArrows}
+				paginationStyle={{ bottom: -20 }}
+				prevButton={
+					<Ionicons
+						name="chevron-back-outline"
+						size={24}
+						color="#FFF"
+						style={styles.controlButton}
+					/>
+				}
+				nextButton={
+					<Ionicons
+						name="chevron-forward-outline"
+						size={24}
+						color="#FFF"
+						style={styles.controlButton}
+					/>
+				}
+			>
+				{item.imageURL && (
+					<View style={styles.slide}>
+						<Image source={{ uri: item.imageURL }} style={styles.image} />
+					</View>
+				)}
+				{item.book && (
+					<View style={styles.slide}>
+						<Image source={{ uri: item.book }} style={styles.image} />
+					</View>
+				)}
+			</Swiper>
+
 			<View style={styles.heartButton}>
 				<TouchableOpacity onPress={() => toggleLike(item.id)}>
 					{postLikeState[item.id] ? (
@@ -60,13 +89,16 @@ const Post = ({
 					)}
 				</TouchableOpacity>
 			</View>
+
 			<Text style={styles.caption}>{item.caption}</Text>
+
 			<TouchableOpacity
 				style={styles.addCommentButton}
 				onPress={() => addCommentModal(item)}
 			>
 				<Text>Add a comment...</Text>
 			</TouchableOpacity>
+
 			<Modal
 				isVisible={commentModalVisible && selectedPost?.id === item.id}
 				onBackdropPress={hideCommentModal}
@@ -106,14 +138,26 @@ const styles = StyleSheet.create({
 	username: {
 		fontWeight: 'bold',
 	},
-	postImage: {
-		width: '105%',
-		alignSelf: 'center',
+	swiperContainer: {
 		height: 270,
+	},
+	slide: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	controlButton: {
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+		borderRadius: 16,
+		padding: 8,
+	},
+	image: {
+		width: '100%',
+		height: '100%',
 		resizeMode: 'contain',
 	},
 	caption: {
-		marginVertical: 8,
+		marginVertical: 10,
 	},
 	profilePic: {
 		width: 50,
