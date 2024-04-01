@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@rneui/themed';
 import * as ImagePicker from 'expo-image-picker';
+import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useState, useEffect } from 'react';
 
 import {
@@ -13,19 +14,27 @@ import {
 	TextInput,
 	TouchableOpacity,
 	View,
+	Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-navigation';
 import Carousel from '../components/Carousel';
 import Modal from 'react-native-modal';
 import SearchBar from '../components/SearchBar';
+import AboutScreen from './AboutScreen'; 
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 import booksReadData from '../data/booksReadCopy.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
-import postsData from '../data/postsData.json'
+import axios from 'axios';
+import {BOOK_API_KEY} from '@env';
 
 export default function ProfileScreen() {
+	const navigation = useNavigation();
+
+	const [searchResults, setSearchResults] = useState([]);
+	const [searchQuery, setSearchQuery] = useState(' ');
+
 	const [user, setUser] = useContext(UserContext);
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [isModalVisible1, setModalVisible1] = useState(false);
@@ -47,9 +56,55 @@ export default function ProfileScreen() {
 		setModalVisible(false);
 	};
 
+	const onShare = async () => {
+        try {
+            const result = await Share.share({
+                message: `Check out my profile: `,
+            });
+            if (result.action === Share.sharedAction) {
+                if (result.activityType) {
+                    // Shared with activity type of result.activityType
+                } else {
+                    // Shared
+                }
+            } else if (result.action === Share.dismissedAction) {
+                // Dismissed
+            }
+        } catch (error) {
+            alert(error.message);
+        }
+    };
+
+	// Define a function to handle the search action   
+	const handleSearch = async (query) => {
+
+		// Update the searchQuery state
+		setSearchQuery(query.trim());
+
+		// Upadate state or make API calls here
+		try {
+			// Make a GET request to the Books-API using Axios
+			const response = await axios.get('https://books-api7.p.rapidapi.com/books/find/title', {
+				params: {
+					title: query,
+				},
+				headers: {
+					'X-RapidAPI-Key': BOOK_API_KEY,
+					'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
+				},
+			});
+
+			// Update the state with the search results
+			setSearchResults(response.data);
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
+	};
+
 	const booksReadTitles = booksReadData.map(book => book.title);
 	const futureBooksTitles = futureBooksData.map(book => book.title)
 	const mysteryBooksTitles = mysteryBooksData.map(book => book.title)
+	const booksLength = booksReadTitles.length + futureBooksTitles.length + mysteryBooksTitles.length
 	
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
@@ -57,27 +112,20 @@ export default function ProfileScreen() {
 			<View style={styles.dropdownContainer}>
 				<TouchableOpacity
 					style={styles.dropdownOption}
-					onPress={() => console.log('Edit Profile')}
-				>
-					<Text>Edit Profile</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={styles.dropdownOption}
-					onPress={() => console.log('Account Settings')}
-				>
-					<Text>Account Settings</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={styles.dropdownOption}
-					onPress={() => console.log('Share Profile')}
+					onPress={onShare}
 				>
 					<Text>Share Profile</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={styles.dropdownOption}
-					onPress={() => console.log('About')}
+					onPress={() => navigation.navigate('AboutScreen')}
 				>
 					<Text>About</Text>
+				</TouchableOpacity>
+				<TouchableOpacity 
+					style={styles.dropdownOption} 
+					onPress={handleLogout}>
+					<Text>Log Out</Text>
 				</TouchableOpacity>
 			</View>
 		);
@@ -154,7 +202,7 @@ export default function ProfileScreen() {
 						<Text>Following</Text>
 					</View>
 					<View>
-						<Text style={styles.count}>75</Text>
+						<Text style={styles.count}>{booksLength}</Text>
 						<Text>Books</Text>
 					</View>
 					<View>
@@ -168,16 +216,6 @@ export default function ProfileScreen() {
 					placeholder="Start typing to write your bio!"
 					style={styles.bio}
 				></TextInput>
-
-				{/* <View>
-					<Carousel 
-						carouselData={postsData}
-						title="Posts" 
-						showMore={showMore0}
-						toggleShowMore={() => setShowMore0(!showMore0)}
-						posts={true}
-					/>
-				</View> */}
 				<View>
 					<Carousel
 						carouselData={booksReadTitles}
@@ -215,14 +253,17 @@ export default function ProfileScreen() {
 					<View style={styles.modalContainer}>
 						<View style={styles.searchModal}>
 							<SearchBar
-								placeholder="Search..."
-								onChangeText={(text) => {
-									// Implement your search logic here
-								}}
-								onCancelButtonPress={() => {
-									// Handle cancel button press if needed
-									setModalVisible1(false);
-								}}
+								onSearch={handleSearch}
+							/>
+							{/* Display search recommendations in a grid */}
+							<FlatList
+								data={searchResults}
+								keyExtractor={(item) => item._id}
+								renderItem={({ item }) => (
+									<TouchableOpacity onPress={() => setModalVisible1(false)}>
+										<Image source={{ uri: item.cover }} style={styles.image} />
+									</TouchableOpacity>
+								)}
 							/>
 							<TouchableOpacity style={styles.closeModal} onPress={() => setModalVisible1(false)}>
 								<Text>Close Modal</Text>
@@ -230,9 +271,6 @@ export default function ProfileScreen() {
 						</View>
 					</View>
 				</Modal>
-				<Button buttonStyle={styles.logoutButton} onPress={handleLogout}>
-					Log Out
-				</Button>
 			</SafeAreaView>
 		</ScrollView>
 	);
@@ -257,6 +295,12 @@ const styles = StyleSheet.create({
 		width: 150,
 		height: 150,
 		borderRadius: 150 / 2,
+	},
+	image: {
+		width: 120,
+		height: 200,
+		margin: 4,
+		borderRadius: 4,
 	},
 	ellipses: {
 		alignSelf: 'flex-end',
