@@ -16,6 +16,7 @@ import {
 	getDoc,
 	getDocs,
 	getFirestore,
+  onSnapshot,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -24,6 +25,7 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
+import { addISOWeekYears } from 'date-fns';
 
 const FirebaseContext = createContext();
 
@@ -121,6 +123,81 @@ const Firebase = {
 			console.log('Error @logOut: ', error.message);
 		}
 		return false;
+	},
+	sendMessage: async (recipientId, recipientName, message) => {
+		try {
+			const senderId = Firebase.getCurrentUser().uid;
+			const chatId = generateChatId(senderId, recipientId);
+			const userInfo = await Firebase.getUserInfo(senderId);
+
+			await addDoc(collection(db, 'chats', chatId), {
+				senderId,
+				recipientId,
+				senderName: userInfo.username,
+				message,
+				recipientName,
+				timestamp: new Date(),
+			});
+			console.log('Message sent from:', senderId, 'to:', recipientId);
+		} catch (error) {
+			console.log('Error @sendMessage: ', error.message);
+		}
+	},
+
+	getAllUsersFromFirestore: async () => {
+		try {
+			const usersSnapshot = await getDocs(collection(db, 'users'));
+			if (usersSnapshot) {
+				const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+				return users;
+			} else {
+				console.log('No users found.');
+				return [];
+			}
+		} catch (error) {
+			console.error('Error fetching all users:', error);
+			throw error;
+		}
+	},
+
+	getMessagesForChat: async (chatId) => {
+		try {
+			const chatRef = collection(db, 'chats', chatId);
+			const queryRef = orderBy(query(chatRef, 'timestamp'), 'desc'); // Rename the variable to avoid conflict
+			const messagesSnapshot = await getDocs(queryRef);
+			if (!messagesSnapshot.empty) {
+				const lastMessage = messagesSnapshot.docs[0].data();
+				return {
+					text: lastMessage.message,
+					timestamp: lastMessage.timestamp.toDate().toLocaleString() // Convert Firestore Timestamp to a readable format
+				};
+			} else {
+				return null;
+			}
+		} catch (error) {
+			console.error('Error fetching messages for chat:', error);
+			throw error;
+		}
+	},
+
+	getMessagesFromFirestore: (recipientId, setMessages) => {
+		const senderId = Firebase.getCurrentUser().uid;
+		const chatId = generateChatId(senderId, recipientId);
+
+		return onSnapshot(collection(db, 'chats', chatId), snapshot => {
+			const messages = [];
+			snapshot.forEach(doc => {
+				const data = doc.data();
+				messages.push({
+					id: doc.id,
+					senderId: data.senderId,
+					message: data.message,
+					senderName: data.senderName,
+					timestamp: data.timestamp.toDate(), // Convert Firestore Timestamp to JavaScript Date
+				});
+			});
+			setMessages(messages);
+		});
 	},
 	addPostForCurrentUser: async (postText, mergedResults) => {
 		try {
@@ -291,6 +368,12 @@ const Firebase = {
 			});
 	},
 };
+
+const generateChatId = (userId1, userId2) => {
+	return userId1 < userId2
+		? `chats/${userId1}_${userId2}`
+		: `chats/${userId2}_${userId1}`;
+
 
 const FirebaseProvider = props => {
 	return (
