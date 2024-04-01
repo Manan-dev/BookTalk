@@ -55,7 +55,7 @@ const MessageScreen = ({ navigation }) => {
 	// 	: userData;
 	
 	const filteredUserData = searchInput
-        ? chats.filter(chat => chat.name.toLowerCase().includes(searchInput.toLowerCase()))
+        ? chats.filter(chat => chat.username.toLowerCase().includes(searchInput.toLowerCase()))
         : chats;
 
 	return (
