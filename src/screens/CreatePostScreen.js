@@ -19,7 +19,7 @@ import { FirebaseContext } from '../context/FirebaseContext';
 export default function CreatePostScreen() {
 	const [searchResults, setSearchResults] = useState([]);
 	const [postText, setPostText] = useState('');
-	const [media, setMedia] = useState([]);
+	const [media, setMedia] = useState('');
 	const navigation = useNavigation();
 	const [search, setSearch] = useState('');
 	const firebase = useContext(FirebaseContext);
@@ -52,15 +52,15 @@ export default function CreatePostScreen() {
 	};
 
 	const handlePost = async () => {
+		// navigate to previous screen
+		navigation.goBack();
+
 		await firebase.addPostForCurrentUser(postText, mergedResults);
 
 		setPostText('');
-		setMedia([]);
+		setMedia('');
 		setSearch('');
 		setSearchResults([]);
-
-		// navigate to previous screen
-		navigation.goBack();
 	};
 
 	const handleAddMedia = async () => {
@@ -76,18 +76,13 @@ export default function CreatePostScreen() {
 				mediaTypes: ImagePicker.MediaTypeOptions.All,
 				aspect: [4, 3],
 				quality: 1,
-				allowsMultipleSelection: true,
 			});
 
 			if (!pickerResult.canceled) {
-				// If the user selected media, access them through the "assets" array
-				const selectedAssets = pickerResult.assets;
-				// Map the selected assets to their URIs
-				const mediaUris = selectedAssets.map(asset => asset.uri);
-				// Construct the object with key "media" and URIs in an array
-				const mediaObject = { media: mediaUris };
-				// Update state with the media object
-				setMedia(prevMedia => [...prevMedia, mediaObject]);
+				const selectedAsset = pickerResult.assets[0]; // Get the first selected asset
+				const mediaUri = selectedAsset.uri;
+				// Update state with the media URI
+				setMedia(mediaUri);
 			}
 		} catch (error) {
 			console.error('Error picking media:', error);
@@ -96,7 +91,7 @@ export default function CreatePostScreen() {
 
 	const mergedResults = [
 		...(searchResults.map(result => ({ book: result.cover })) || []),
-		...(media || []),
+		{ imageURL: media },
 	];
 
 	return (
@@ -131,16 +126,11 @@ export default function CreatePostScreen() {
 				<ScrollView horizontal>
 					{mergedResults.map((item, index) => (
 						<TouchableOpacity key={index} onPress={() => console.log(item)}>
-							{Array.isArray(item.media) ? (
-								<View style={styles.imageContainer}>
-									{item.media.map((uri, idx) => (
-										<Image
-											key={idx}
-											source={{ uri }}
-											style={styles.mediaPreview}
-										/>
-									))}
-								</View>
+							{item.imageURL ? (
+								<Image
+									source={{ uri: item.imageURL }}
+									style={styles.mediaPreview}
+								/>
 							) : (
 								<Image
 									source={{ uri: item.book }}

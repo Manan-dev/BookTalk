@@ -126,24 +126,18 @@ const Firebase = {
 
 			const uploadTasks = [];
 
-			// Iterate over each item in mergedResults
 			for (const item of mergedResults) {
-				// Check if the item contains media
-				if (item.media) {
-					// Iterate over each media URI in the item
-					for (const mediaUri of item.media) {
-						const nameOfFile = mediaUri.split('/').pop();
-						const mediaRef = ref(
-							storage,
-							`media/${currentUserId}/${nameOfFile}`
-						);
-						const photo = await Firebase.getBlob(mediaUri);
-						// Start the upload task and store the promise
-						const uploadTask = uploadBytes(mediaRef, photo).then(() => {
-							return getDownloadURL(mediaRef);
-						});
-						uploadTasks.push(uploadTask);
-					}
+				// Check if the item contains an imageURL
+				if (item.imageURL) {
+					const mediaUri = item.imageURL; // Get the URI of the media item
+					const nameOfFile = mediaUri.split('/').pop();
+					const mediaRef = ref(storage, `media/${currentUserId}/${nameOfFile}`);
+					const photo = await Firebase.getBlob(mediaUri);
+					// Start the upload task and store the promise
+					const uploadTask = uploadBytes(mediaRef, photo).then(() => {
+						return getDownloadURL(mediaRef);
+					});
+					uploadTasks.push(uploadTask);
 				}
 			}
 
@@ -153,7 +147,7 @@ const Firebase = {
 			// Create a new post object
 			const newPost = {
 				caption: postText || '',
-				media: mediaUrls,
+				imageURL: mediaUrls[0] || '',
 				book: mergedResults[0]?.book || '',
 			};
 
@@ -162,9 +156,6 @@ const Firebase = {
 				collection(db, `users/${currentUserId}/posts`),
 				newPost
 			);
-
-			await addDoc(collection(docRef, 'comments'), {});
-			await addDoc(collection(docRef, 'likes'), {});
 			console.log('Post added with ID: ', docRef.id);
 		} catch (error) {
 			console.error('Error adding post: ', error);
