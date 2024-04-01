@@ -27,7 +27,8 @@ const Feed = () => {
 	useEffect(() => {
 		const fetchPosts = async () => {
 			try {
-				const fetchedPosts = await firebase.getAllPosts();
+				let fetchedPosts = await firebase.getAllPosts();
+				fetchedPosts = fetchedPosts.slice(0, 6);
 				setPosts(fetchedPosts);
 				const commentsObj = {};
 				fetchedPosts.forEach(post => {
@@ -152,6 +153,7 @@ const Feed = () => {
 
 	return (
 		<View style={styles.container}>
+			{console.log(posts)}
 			<FlatList
 				data={posts}
 				keyExtractor={item => item.id}

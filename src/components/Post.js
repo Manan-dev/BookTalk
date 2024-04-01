@@ -27,7 +27,8 @@ const Post = ({
 	user,
 	postLikeState,
 }) => {
-	const shouldShowArrows = item.imageURL && item.book;
+	const shouldShowArrows = Boolean(item.imageURL && item.book);
+
 	return (
 		<View style={styles.postContainer}>
 			<View style={styles.topContainer}>
