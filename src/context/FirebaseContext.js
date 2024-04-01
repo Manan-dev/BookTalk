@@ -233,17 +233,17 @@ const Firebase = {
 		} catch (error) {
 			console.error('Error removing like from database:', error);
 		}
-		resetPassword: async email => {
-			sendPasswordResetEmail(auth, email)
-				.then(() => {
-					console.log('Password reset email sent to', email);
-				})
-				.catch(error => {
-					const errorCode = error.code;
-					const errorMessage = error.message;
-					console.log('Error @resetPassword: ', errorCode, errorMessage);
-				});
-		};
+	},
+	resetPassword: async email => {
+		sendPasswordResetEmail(auth, email)
+			.then(() => {
+				console.log('Password reset email sent to', email);
+			})
+			.catch(error => {
+				const errorCode = error.code;
+				const errorMessage = error.message;
+				console.log('Error @resetPassword: ', errorCode, errorMessage);
+			});
 	},
 };
 
