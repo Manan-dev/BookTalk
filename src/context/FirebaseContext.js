@@ -122,6 +122,51 @@ const Firebase = {
 		}
 		return false;
 	},
+	addPostForCurrentUser: async (postText, mergedResults) => {
+		try {
+			// Get the current user
+			const currentUser = Firebase.getCurrentUser();
+
+			// Get the current user's ID
+			const currentUserId = currentUser.uid;
+
+			const uploadTasks = [];
+
+			for (const item of mergedResults) {
+				// Check if the item contains an imageURL
+				if (item.imageURL) {
+					const mediaUri = item.imageURL; // Get the URI of the media item
+					const nameOfFile = mediaUri.split('/').pop();
+					const mediaRef = ref(storage, `media/${currentUserId}/${nameOfFile}`);
+					const photo = await Firebase.getBlob(mediaUri);
+					// Start the upload task and store the promise
+					const uploadTask = uploadBytes(mediaRef, photo).then(() => {
+						return getDownloadURL(mediaRef);
+					});
+					uploadTasks.push(uploadTask);
+				}
+			}
+
+			// Wait for all upload tasks to complete
+			const mediaUrls = await Promise.all(uploadTasks);
+
+			// Create a new post object
+			const newPost = {
+				caption: postText || '',
+				imageURL: mediaUrls[0] || '',
+				book: mergedResults[0]?.book || '',
+			};
+
+			// Add the new post document to the 'posts' subcollection of the current user
+			const docRef = await addDoc(
+				collection(db, `users/${currentUserId}/posts`),
+				newPost
+			);
+			console.log('Post added with ID: ', docRef.id);
+		} catch (error) {
+			console.error('Error adding post: ', error);
+		}
+	},
 	getAllPosts: async () => {
 		try {
 			const usersSnapshot = await getDocs(collection(db, 'users'));
