@@ -15,10 +15,12 @@ import {
 	getFirestore,
 	onSnapshot,
 	setDoc,
-} from 'firebase/firestore';
+	getDocs, // Add this import
+} from 'firebase/firestore'; // Modify this import
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
+import { addISOWeekYears } from 'date-fns';
 
 const FirebaseContext = createContext();
 
@@ -136,6 +138,43 @@ const Firebase = {
 			console.log('Error @sendMessage: ', error.message);
 		}
 	},
+
+	getAllUsersFromFirestore: async () => {
+		try {
+			const usersSnapshot = await getDocs(collection(db, 'users'));
+			if (usersSnapshot) {
+				const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+				return users;
+			} else {
+				console.log('No users found.');
+				return [];
+			}
+		} catch (error) {
+			console.error('Error fetching all users:', error);
+			throw error;
+		}
+	},
+
+	getMessagesForChat: async (chatId) => {
+		try {
+			const chatRef = collection(db, 'chats', chatId);
+			const queryRef = orderBy(query(chatRef, 'timestamp'), 'desc'); // Rename the variable to avoid conflict
+			const messagesSnapshot = await getDocs(queryRef);
+			if (!messagesSnapshot.empty) {
+				const lastMessage = messagesSnapshot.docs[0].data();
+				return {
+					text: lastMessage.message,
+					timestamp: lastMessage.timestamp.toDate().toLocaleString() // Convert Firestore Timestamp to a readable format
+				};
+			} else {
+				return null;
+			}
+		} catch (error) {
+			console.error('Error fetching messages for chat:', error);
+			throw error;
+		}
+	},
+
 	getMessagesFromFirestore: (recipientId, setMessages) => {
 		const senderId = Firebase.getCurrentUser().uid;
 		const chatId = generateChatId(senderId, recipientId);

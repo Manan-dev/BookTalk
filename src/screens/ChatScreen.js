@@ -56,7 +56,7 @@ const ChatScreen = ({ route, navigation }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity onPress={() => navigation.goBack()}>
+				<TouchableOpacity onPress={() => navigation.navigate('MessageScreen')}>
 					<Ionicons name="arrow-back" size={20} style={styles.icon} />
 				</TouchableOpacity>
 				<Text style={styles.boldText}>{userName}</Text>
@@ -167,6 +167,7 @@ const styles = StyleSheet.create({
 	senderMessage: {
 		alignSelf: 'flex-end',
 		backgroundColor: '#395dff',
+		// backgroundColor: '#7792d3',
 		color: '#fff',
 	},
 	messageContent: {

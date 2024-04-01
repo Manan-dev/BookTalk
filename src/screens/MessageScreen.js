@@ -1,6 +1,6 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { createStackNavigator } from '@react-navigation/stack';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
 	FlatList,
 	Image,
@@ -13,71 +13,33 @@ import {
 import profileImage from '../../assets/profile.png';
 import { FirebaseContext } from '../context/FirebaseContext';
 import ChatScreen from './ChatScreen';
+import SearchNewUser from './SearchNewUser';
 
 const Stack = createStackNavigator();
 
 const MessageScreen = ({ navigation }) => {
 	// State for search input value
-	const [SearchInput, setSearchInput] = useState('');
+	const [searchInput, setSearchInput] = useState('');
 
 	// State to manage the edit mode
 	const [editMode, setEditMode] = useState(false);
 
+	const [chats, setChats] = useState([]);
+
 	const firebase = React.useContext(FirebaseContext);
 
-	// Sample data for user chats
-	const [userData, setUserData] = useState([
-		{
-			id: '1',
-			name: 'Selena',
-			message: 'Looking for a good fantasy series. Any suggetions?',
-			pinned: false,
-		},
-		{
-			id: '2',
-			name: 'Tia',
-			message: 'Lost in the magical world of "Harry Potter" again.',
-			pinned: false,
-		},
-		{
-			id: '3',
-			name: 'Katie',
-			message: 'Any book recommendations for the weekend?',
-			pined: false,
-		},
-		{
-			id: '4',
-			name: 'Lisa',
-			message:
-				'Just started a new mystery novel. Excited to see how it unfolds!',
-			pined: false,
-		},
-		{
-			id: '5',
-			name: 'Paige',
-			message: 'Reading a heartwarming romance. Perfect for a cozy evening.',
-			pined: false,
-		},
-		{
-			id: '6',
-			name: 'Hope',
-			message: 'I recently enjoyed "To Kill a Mockingbird".',
-			pined: false,
-		},
-		{
-			id: '7',
-			name: 'Rue',
-			message: 'Just finished an amazing book!',
-			pined: false,
-		},
-		{
-			id: '8',
-			name: 'Erika',
-			message: 'Currently reading a gripping thriller.',
-			pined: false,
-		},
-		// Add more user data as needed
-	]);
+	useEffect(() => {
+		fetchChats();
+	}, []);
+
+	const fetchChats = async () => {
+		try {
+			const fetchedChats = await firebase.getAllUsersFromFirestore();
+			setChats(fetchedChats);
+		} catch (error) {
+			console.error('Error fetching chats:', error);
+		}
+	};
 
 	// Function to handle delete chat
 	const handlleDeleteChat = userId => {
@@ -86,9 +48,15 @@ const MessageScreen = ({ navigation }) => {
 	};
 
 	// Filtered user data based on search input
-	const filteredUserData = userData.filter(user =>
-		user.name.toLowerCase().includes(SearchInput.toLowerCase())
-	);
+	// const filteredUserData = searchInput
+	// 	? userData.filter(user =>
+	// 		user.name.toLowerCase().includes(searchInput.toLowerCase())
+	// 		)
+	// 	: userData;
+	
+	const filteredUserData = searchInput
+        ? chats.filter(chat => chat.name.toLowerCase().includes(searchInput.toLowerCase()))
+        : chats;
 
 	return (
 		<View style={styles.container}>
@@ -97,13 +65,12 @@ const MessageScreen = ({ navigation }) => {
 				<TouchableOpacity onPress={() => setEditMode(!editMode)}>
 					<Text style={styles.edit}>{editMode ? 'Done' : 'Edit'}</Text>
 				</TouchableOpacity>
-
+				
 				<Text style={styles.boldText}>Messages</Text>
 
 				<TouchableOpacity
-					onPress={() => console.log('New Message button pressed')}
+					onPress={() => navigation.navigate('SearchNewUser')}
 				>
-					{/* <Feather name="message-square" size={20} color="black" style={styles.icon} /> */}
 					<Ionicons name="md-person-add" size={20} style={styles.icon} />
 				</TouchableOpacity>
 			</View>
@@ -117,9 +84,9 @@ const MessageScreen = ({ navigation }) => {
 					style={styles.searchIcon}
 				/>
 				<TextInput
-					style={styles.SearchInput}
+					style={styles.searchInput}
 					placeholder="Search"
-					value={SearchInput}
+					value={searchInput}
 					onChangeText={text => setSearchInput(text)}
 				/>
 			</View>
@@ -139,14 +106,20 @@ const MessageScreen = ({ navigation }) => {
 						}
 					>
 						{/* User profile image on the left */}
-						<Image source={profileImage} style={styles.profileImage} />
+						{/* <Image source={profileImage} style={styles.profileImage} /> */}
+ 						<Image source={{ uri: item.profilePhotoUrl }} style={styles.profileImage} />
 
 						{/* User information and message */}
-						<View style={styles.userInfo}>
+						{/* <View style={styles.userInfo}>
 							<Text style={styles.userName}>{item.name}</Text>
 							<Text style={styles.userMessage}>{item.message}</Text>
-						</View>
+						</View> */}
 
+						<View style={styles.chatContent}>
+	                            <Text style={styles.userName}>{item.username}</Text>
+	                           <Text style={styles.lastMessage}>{item.lastMessage}</Text>
+	                    </View>
+						<Text style={styles.lastMessageTime}>{item.lastMessageTime}</Text>
 						{/* Delete icon for edit mode */}
 						{editMode && (
 							<TouchableOpacity onPress={() => handlleDeleteChat(item.id)}>
@@ -186,7 +159,7 @@ const styles = StyleSheet.create({
 	searchIcon: {
 		marginRight: 10,
 	},
-	SearchInput: {
+	searchInput: {
 		flex: 1,
 		height: 40,
 	},
@@ -218,6 +191,10 @@ const styles = StyleSheet.create({
 		borderRadius: 25,
 		marginRight: 10,
 	},
+	chatContent: {
+        flex: 1,
+    },
+
 	userInfo: {
 		flex: 1,
 	},
@@ -228,6 +205,13 @@ const styles = StyleSheet.create({
 	userMessage: {
 		color: '#888',
 	},
+	lastMessage: {
+        color: '#888',
+    },
+    lastMessageTime: {
+        fontSize: 12,
+        color: '#888',
+    },
 	messageInputContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -258,6 +242,11 @@ export default () => (
 			name="ChatScreen"
 			component={ChatScreen}
 			options={{ headerShown: false }}
+		/>
+		<Stack.Screen
+			name="SearchNewUser"
+			component={SearchNewUser}
+			options={{ headerShown: false}}
 		/>
 	</Stack.Navigator>
 );
