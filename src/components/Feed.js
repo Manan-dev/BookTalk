@@ -153,7 +153,6 @@ const Feed = () => {
 
 	return (
 		<View style={styles.container}>
-			{console.log(posts)}
 			<FlatList
 				data={posts}
 				keyExtractor={item => item.id}
