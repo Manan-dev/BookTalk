@@ -9,35 +9,23 @@ import {
 	View,
 } from 'react-native';
 import { FirebaseContext } from '../context/FirebaseContext';
-import { UserContext } from '../context/UserContext';
 
-export default function SigninScreen({ navigation }) {
+export default function ForgotPasswordScreen({ navigation }) {
 	const [email, setEmail] = useState('');
-	const [password, setPassword] = useState('');
 	const [loading, setLoading] = useState(false);
+	const [message, setMessage] = useState(null);
 
 	const firebase = React.useContext(FirebaseContext);
-	const [_, setUser] = React.useContext(UserContext);
 
-	handleSignin = async () => {
+	const handleResetPassword = async () => {
 		setLoading(true);
+		setMessage(null);
 
 		try {
-			await firebase.signin(email, password);
-
-			const uid = firebase.getCurrentUser().uid;
-
-			const userInfo = await firebase.getUserInfo(uid);
-
-			setUser({
-				username: userInfo.username,
-				email: userInfo.email,
-				uid,
-				profilePhotoUrl: userInfo.profilePhotoUrl,
-				isLoggedIn: true,
-			});
+			await firebase.resetPassword(email);
+			setMessage('Password reset email sent. Check your inbox.');
 		} catch (error) {
-			alert(error.message);
+			setMessage(error.message);
 		} finally {
 			setLoading(false);
 		}
@@ -45,7 +33,7 @@ export default function SigninScreen({ navigation }) {
 
 	return (
 		<SafeAreaView style={styles.container}>
-			<Text style={styles.titleText}>BookTalk</Text>
+			<Text style={styles.titleText}>Forgot Password</Text>
 			<View style={styles.auth}>
 				<View style={styles.authContainer}>
 					<Input
@@ -57,30 +45,26 @@ export default function SigninScreen({ navigation }) {
 						value={email}
 						onChangeText={email => setEmail(email)}
 					></Input>
-					<Input
-						placeholder="Password"
-						autoCapitalize="none"
-						autoCorrect={false}
-						secureTextEntry={true}
-						value={password}
-						onChangeText={password => setPassword(password)}
-					></Input>
 				</View>
 			</View>
 			{loading ? (
 				<Button
-					buttonStyle={styles.signinButton}
+					buttonStyle={styles.resetPasswordButton}
 					loading
 					disabled={true}
 				></Button>
 			) : (
-				<Button buttonStyle={styles.signinButton} onPress={handleSignin}>
-					Sign in
+				<Button
+					buttonStyle={styles.resetPasswordButton}
+					onPress={handleResetPassword}
+				>
+					Reset Password
 				</Button>
 			)}
+			{message && <Text style={styles.message}>{message}</Text>}
 			<TouchableOpacity
-				style={styles.forgotPasswordLink}
-				onPress={() => navigation.navigate('ForgotPassword')}
+				style={styles.backToSigninLink}
+				onPress={() => navigation.goBack()}
 			>
 				<Text
 					style={{
@@ -88,15 +72,7 @@ export default function SigninScreen({ navigation }) {
 						textDecorationLine: 'underline',
 					}}
 				>
-					Forgot Password?
-				</Text>
-			</TouchableOpacity>
-			<TouchableOpacity
-				style={styles.signup}
-				onPress={() => navigation.navigate('Signup')}
-			>
-				<Text>
-					Don't have an account? <Text style={styles.signupLink}>Sign up</Text>
+					Back to Sign In
 				</Text>
 			</TouchableOpacity>
 
@@ -118,20 +94,18 @@ const styles = StyleSheet.create({
 	},
 	auth: {},
 	authContainer: {},
-	signup: {
-		marginTop: 10,
-		alignItems: 'center',
-	},
-	signinButton: {
+	resetPasswordButton: {
 		width: '80%',
 		borderRadius: 10,
 		alignSelf: 'center',
+		marginTop: 20,
 	},
-	signupLink: {
-		fontWeight: 'bold',
-		color: 'rgb(67, 135, 214)',
+	message: {
+		alignSelf: 'center',
+		marginTop: 10,
+		color: 'green',
 	},
-	forgotPasswordLink: {
+	backToSigninLink: {
 		alignSelf: 'center',
 		marginTop: 10,
 	},
