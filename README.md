@@ -16,7 +16,6 @@ BookTalk is a mobile application built with React Native and Expo, designed to p
 - **Interactive Book Reviews**: Create engaging posts with ratings, comments, and multimedia elements.
 - **Social Engagement**: Like, comment, share, and save posts to foster community engagement.
 - **User Connections**: Follow other users, build a network of followers, and make connections.
-- **Event Planning**: Join groups, create events, and participate in book clubs.
 - **Recommendations**: Get personalized book and group recommendations.
 - **User Profile**: Display followers/following, private/public reading lists, and custom lists.
 
@@ -45,9 +44,17 @@ BookTalk is a mobile application built with React Native and Expo, designed to p
 
 1. **Run the Application**:
 
-    ```bash
-      npm start
-    ```
+- Android:
+
+  ```bash
+    npm run android
+  ```
+
+- iOS:
+
+  ```bash
+    npm run ios
+  ```
 
 ## License
 
