@@ -16,7 +16,7 @@ import {
 	getDoc,
 	getDocs,
 	getFirestore,
-  onSnapshot,
+	onSnapshot,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -25,7 +25,6 @@ import {
 import { getDownloadURL, getStorage, ref, uploadBytes } from 'firebase/storage';
 import { createContext } from 'react';
 import { firebaseConfig } from '../../firebaseConfig';
-import { addISOWeekYears } from 'date-fns';
 
 const FirebaseContext = createContext();
 
@@ -148,7 +147,10 @@ const Firebase = {
 		try {
 			const usersSnapshot = await getDocs(collection(db, 'users'));
 			if (usersSnapshot) {
-				const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+				const users = usersSnapshot.docs.map(doc => ({
+					id: doc.id,
+					...doc.data(),
+				}));
 				return users;
 			} else {
 				console.log('No users found.');
@@ -160,7 +162,7 @@ const Firebase = {
 		}
 	},
 
-	getMessagesForChat: async (chatId) => {
+	getMessagesForChat: async chatId => {
 		try {
 			const chatRef = collection(db, 'chats', chatId);
 			const queryRef = orderBy(query(chatRef, 'timestamp'), 'desc'); // Rename the variable to avoid conflict
@@ -169,7 +171,7 @@ const Firebase = {
 				const lastMessage = messagesSnapshot.docs[0].data();
 				return {
 					text: lastMessage.message,
-					timestamp: lastMessage.timestamp.toDate().toLocaleString() // Convert Firestore Timestamp to a readable format
+					timestamp: lastMessage.timestamp.toDate().toLocaleString(), // Convert Firestore Timestamp to a readable format
 				};
 			} else {
 				return null;
@@ -373,7 +375,7 @@ const generateChatId = (userId1, userId2) => {
 	return userId1 < userId2
 		? `chats/${userId1}_${userId2}`
 		: `chats/${userId2}_${userId1}`;
-
+};
 
 const FirebaseProvider = props => {
 	return (
