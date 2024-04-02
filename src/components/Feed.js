@@ -28,7 +28,10 @@ const Feed = () => {
 		const fetchPosts = async () => {
 			try {
 				let fetchedPosts = await firebase.getAllPosts();
+
+				// TODO: REMOVE THIS WHEN PAGINATION IS IMPLEMENTED
 				fetchedPosts = fetchedPosts.slice(0, 6);
+
 				setPosts(fetchedPosts);
 				const commentsObj = {};
 				fetchedPosts.forEach(post => {
