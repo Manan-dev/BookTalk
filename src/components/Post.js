@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
 	Image,
@@ -28,17 +29,22 @@ const Post = ({
 	postLikeState,
 }) => {
 	const shouldShowArrows = Boolean(item.imageURL && item.book);
-
+	const navigation = useNavigation();
+	const navigateToSecondaryProfile = () => {
+		navigation.navigate('SecondaryProfile', { user: item });
+	};
 	return (
 		<View style={styles.postContainer}>
 			<View style={styles.topContainer}>
-				<View style={styles.userInfoContainer}>
-					<Image
-						source={{ uri: item.profilePhotoUrl }}
-						style={styles.profilePic}
-					/>
-					<Text style={styles.username}>{item.username}</Text>
-				</View>
+				<TouchableOpacity onPress={navigateToSecondaryProfile}>
+					<View style={styles.userInfoContainer}>
+						<Image
+							source={{ uri: item.profilePhotoUrl }}
+							style={styles.profilePic}
+						/>
+						<Text style={styles.username}>{item.username}</Text>
+					</View>
+				</TouchableOpacity>
 				<View>
 					<TouchableOpacity onPress={() => ellipsisClicked(item)}>
 						<Ionicons name="ellipsis-horizontal" size={24} color="black" />
