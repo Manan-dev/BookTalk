@@ -369,6 +369,56 @@ const Firebase = {
 				console.log('Error @resetPassword: ', errorCode, errorMessage);
 			});
 	},
+	checkFollowStatus: async (currentUserId, profileUserId) => {
+		try {
+			const docSnapshot = await getDoc(
+				doc(db, `followers/${profileUserId}/following/${currentUserId}`)
+			);
+			return docSnapshot.exists();
+		} catch (error) {
+			console.error('Error checking follow status:', error);
+			return false;
+		}
+	},
+
+	followUser: async profileUserId => {
+		try {
+			const currentUserId = Firebase.getCurrentUser().uid;
+			const followingRef = doc(
+				db,
+				`followers/${profileUserId}/following/${currentUserId}`
+			);
+			const followersRef = doc(
+				db,
+				`followers/${currentUserId}/followers/${profileUserId}`
+			);
+			await Promise.all([
+				setDoc(followingRef, { timestamp: serverTimestamp() }),
+				setDoc(followersRef, { timestamp: serverTimestamp() }),
+			]);
+			console.log('User followed successfully!');
+		} catch (error) {
+			console.error('Error following user:', error);
+		}
+	},
+
+	unfollowUser: async profileUserId => {
+		try {
+			const currentUserId = Firebase.getCurrentUser().uid;
+			const followingRef = doc(
+				db,
+				`followers/${profileUserId}/following/${currentUserId}`
+			);
+			const followersRef = doc(
+				db,
+				`followers/${currentUserId}/followers/${profileUserId}`
+			);
+			await Promise.all([deleteDoc(followingRef), deleteDoc(followersRef)]);
+			console.log('User unfollowed successfully!');
+		} catch (error) {
+			console.error('Error unfollowing user:', error);
+		}
+	},
 };
 
 const generateChatId = (userId1, userId2) => {
