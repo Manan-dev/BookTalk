@@ -386,11 +386,11 @@ const Firebase = {
 			const currentUserId = Firebase.getCurrentUser().uid;
 			const followingRef = doc(
 				db,
-				`followers/${profileUserId}/following/${currentUserId}`
+				`followers/${currentUserId}/following/${profileUserId}`
 			);
 			const followersRef = doc(
 				db,
-				`followers/${currentUserId}/followers/${profileUserId}`
+				`followers/${profileUserId}/followers/${currentUserId}`
 			);
 			await Promise.all([
 				setDoc(followingRef, { timestamp: serverTimestamp() }),
@@ -417,6 +417,33 @@ const Firebase = {
 			console.log('User unfollowed successfully!');
 		} catch (error) {
 			console.error('Error unfollowing user:', error);
+		}
+	},
+	getFollowerCount: async userId => {
+		try {
+			// Query the 'followers' collection for the specified user
+			const followersSnapshot = await getDocs(
+				collection(db, `followers/${userId}/followers`)
+			);
+			// Return the number of followers
+			return followersSnapshot.size;
+		} catch (error) {
+			console.error('Error fetching follower count:', error);
+			throw error;
+		}
+	},
+
+	getFollowingCount: async userId => {
+		try {
+			// Query the 'following' collection for the specified user
+			const followingSnapshot = await getDocs(
+				collection(db, `followers/${userId}/following`)
+			);
+			// Return the number of users the specified user is following
+			return followingSnapshot.size;
+		} catch (error) {
+			console.error('Error fetching following count:', error);
+			throw error;
 		}
 	},
 };
