@@ -1,33 +1,31 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Button } from '@rneui/themed';
-import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
-import React, { useContext, useState, useEffect } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import React, { useContext, useEffect, useState } from 'react';
 
+import { BOOK_API_KEY } from '@env';
+import axios from 'axios';
 import {
 	FlatList,
 	Image,
 	Platform,
 	ScrollView,
+	Share,
 	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
 	View,
-	Share,
 } from 'react-native';
+import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-navigation';
 import Carousel from '../components/Carousel';
-import Modal from 'react-native-modal';
 import SearchBar from '../components/SearchBar';
-import AboutScreen from './AboutScreen'; 
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 import booksReadData from '../data/booksReadCopy.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
-import axios from 'axios';
-import {BOOK_API_KEY} from '@env';
 
 export default function ProfileScreen() {
 	const navigation = useNavigation();
@@ -36,6 +34,7 @@ export default function ProfileScreen() {
 	const [searchQuery, setSearchQuery] = useState(' ');
 
 	const [user, setUser] = useContext(UserContext);
+	const [bio, setBio] = useState('');
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [isModalVisible1, setModalVisible1] = useState(false);
 	const firebase = useContext(FirebaseContext);
@@ -43,6 +42,17 @@ export default function ProfileScreen() {
 	const [showMore1, setShowMore1] = useState(false);
 	const [showMore2, setShowMore2] = useState(false);
 	const [showMore3, setShowMore3] = useState(false);
+
+	useEffect(() => {
+		// Fetch the user's bio when the component mounts
+		const fetchBio = async () => {
+			const userData = await firebase.getUserInfo(user.uid);
+			if (userData && userData.bio) {
+				setBio(userData.bio);
+			}
+		};
+		fetchBio();
+	}, []);
 
 	const ellipsisClicked = () => {
 		setModalVisible(true);
@@ -57,42 +67,44 @@ export default function ProfileScreen() {
 	};
 
 	const onShare = async () => {
-        try {
-            const result = await Share.share({
-                message: `Check out my profile: `,
-            });
-            if (result.action === Share.sharedAction) {
-                if (result.activityType) {
-                    // Shared with activity type of result.activityType
-                } else {
-                    // Shared
-                }
-            } else if (result.action === Share.dismissedAction) {
-                // Dismissed
-            }
-        } catch (error) {
-            alert(error.message);
-        }
-    };
+		try {
+			const result = await Share.share({
+				message: `Check out my profile: `,
+			});
+			if (result.action === Share.sharedAction) {
+				if (result.activityType) {
+					// Shared with activity type of result.activityType
+				} else {
+					// Shared
+				}
+			} else if (result.action === Share.dismissedAction) {
+				// Dismissed
+			}
+		} catch (error) {
+			alert(error.message);
+		}
+	};
 
-	// Define a function to handle the search action   
-	const handleSearch = async (query) => {
-
+	// Define a function to handle the search action
+	const handleSearch = async query => {
 		// Update the searchQuery state
 		setSearchQuery(query.trim());
 
 		// Upadate state or make API calls here
 		try {
 			// Make a GET request to the Books-API using Axios
-			const response = await axios.get('https://books-api7.p.rapidapi.com/books/find/title', {
-				params: {
-					title: query,
-				},
-				headers: {
-					'X-RapidAPI-Key': BOOK_API_KEY,
-					'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
-				},
-			});
+			const response = await axios.get(
+				'https://books-api7.p.rapidapi.com/books/find/title',
+				{
+					params: {
+						title: query,
+					},
+					headers: {
+						'X-RapidAPI-Key': BOOK_API_KEY,
+						'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
+					},
+				}
+			);
 
 			// Update the state with the search results
 			setSearchResults(response.data);
@@ -102,18 +114,18 @@ export default function ProfileScreen() {
 	};
 
 	const booksReadTitles = booksReadData.map(book => book.title);
-	const futureBooksTitles = futureBooksData.map(book => book.title)
-	const mysteryBooksTitles = mysteryBooksData.map(book => book.title)
-	const booksLength = booksReadTitles.length + futureBooksTitles.length + mysteryBooksTitles.length
-	
+	const futureBooksTitles = futureBooksData.map(book => book.title);
+	const mysteryBooksTitles = mysteryBooksData.map(book => book.title);
+	const booksLength =
+		booksReadTitles.length +
+		futureBooksTitles.length +
+		mysteryBooksTitles.length;
+
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
 		return (
 			<View style={styles.dropdownContainer}>
-				<TouchableOpacity
-					style={styles.dropdownOption}
-					onPress={onShare}
-				>
+				<TouchableOpacity style={styles.dropdownOption} onPress={onShare}>
 					<Text>Share Profile</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
@@ -122,9 +134,7 @@ export default function ProfileScreen() {
 				>
 					<Text>About</Text>
 				</TouchableOpacity>
-				<TouchableOpacity 
-					style={styles.dropdownOption} 
-					onPress={handleLogout}>
+				<TouchableOpacity style={styles.dropdownOption} onPress={handleLogout}>
 					<Text>Log Out</Text>
 				</TouchableOpacity>
 			</View>
@@ -163,6 +173,18 @@ export default function ProfileScreen() {
 			}
 		}
 	};
+
+	const updateBio = async () => {
+		// Update the bio in the backend
+		const success = await firebase.updateUserBio(user.uid, bio);
+		if (success) {
+			// Update the local state with the new bio
+			setUser(prevUser => ({ ...prevUser, bio }));
+			console.log('Bio updated successfully');
+		} else {
+			console.log('Failed to update bio');
+		}
+	};
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			<SafeAreaView style={styles.content}>
@@ -183,11 +205,9 @@ export default function ProfileScreen() {
 							style={styles.selectedProfilePic}
 						/>
 					) : (
-						<Ionicons
-							name="add-circle"
-							size={150}
-							color="#edebeb"
-							style={styles.profilePicIcon}
+						<Image
+							source={{ uri: 'https://www.gravatar.com/avatar/000?d=mp' }}
+							style={styles.selectedProfilePic}
 						/>
 					)}
 				</TouchableOpacity>
@@ -214,8 +234,13 @@ export default function ProfileScreen() {
 					multiline
 					numberOfLines={4}
 					placeholder="Start typing to write your bio!"
+					value={bio}
 					style={styles.bio}
+					onChangeText={setBio}
 				></TextInput>
+				<TouchableOpacity onPress={updateBio} style={styles.updateBioButton}>
+					<Text>Update Bio</Text>
+				</TouchableOpacity>
 				<View>
 					<Carousel
 						carouselData={booksReadTitles}
@@ -232,7 +257,7 @@ export default function ProfileScreen() {
 						carouselData={mysteryBooksTitles}
 						carouselTitle="Favorite Mystery Books"
 						showMore={showMore2}
-						toggleShowMore={() => setShowMore2(!showMore2)} 
+						toggleShowMore={() => setShowMore2(!showMore2)}
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
@@ -244,28 +269,32 @@ export default function ProfileScreen() {
 						carouselTitle="To Be Read"
 						showMore={showMore3}
 						toggleShowMore={() => setShowMore3(!showMore3)}
-						toggleModal={toggleModal} 
+						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
 					/>
 				</View>
-				<Modal isVisible={isModalVisible1} onBackdropPress={() => setModalVisible1(true)}>
+				<Modal
+					isVisible={isModalVisible1}
+					onBackdropPress={() => setModalVisible1(true)}
+				>
 					<View style={styles.modalContainer}>
 						<View style={styles.searchModal}>
-							<SearchBar
-								onSearch={handleSearch}
-							/>
+							<SearchBar onSearch={handleSearch} />
 							{/* Display search recommendations in a grid */}
 							<FlatList
 								data={searchResults}
-								keyExtractor={(item) => item._id}
+								keyExtractor={item => item._id}
 								renderItem={({ item }) => (
 									<TouchableOpacity onPress={() => setModalVisible1(false)}>
 										<Image source={{ uri: item.cover }} style={styles.image} />
 									</TouchableOpacity>
 								)}
 							/>
-							<TouchableOpacity style={styles.closeModal} onPress={() => setModalVisible1(false)}>
+							<TouchableOpacity
+								style={styles.closeModal}
+								onPress={() => setModalVisible1(false)}
+							>
 								<Text>Close Modal</Text>
 							</TouchableOpacity>
 						</View>
@@ -285,7 +314,7 @@ const styles = StyleSheet.create({
 	profileContainer: {
 		flexDirection: 'row',
 		paddingHorizontal: 20,
-		alignItems:'flex-end',
+		alignItems: 'flex-end',
 	},
 	profilePicIcon: {
 		alignItems: 'center',
@@ -304,14 +333,14 @@ const styles = StyleSheet.create({
 	},
 	ellipses: {
 		alignSelf: 'flex-end',
-		marginRight: 20
+		marginRight: 20,
 	},
 	dropdownContainer: {
 		backgroundColor: 'white',
 		padding: 16,
 		borderRadius: 8,
 		alignSelf: 'flex-end',
-		marginBottom: 400
+		marginBottom: 400,
 	},
 	dropdownOption: {
 		paddingVertical: 8,
@@ -329,26 +358,26 @@ const styles = StyleSheet.create({
 	},
 	closeModal: {
 		position: 'absolute',
-        bottom: 20,
-        right: 20,
-        backgroundColor: 'gray',
-        width: 100,
-        height: 25,
-        justifyContent: 'center',
-        alignItems: 'center',
+		bottom: 20,
+		right: 20,
+		backgroundColor: 'gray',
+		width: 100,
+		height: 25,
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 	modalContainer: {
 		flex: 1,
-        justifyContent: 'center',
-        alignSelf: 'center',
+		justifyContent: 'center',
+		alignSelf: 'center',
 		width: '110%',
 	},
-	searchModal: { 
+	searchModal: {
 		backgroundColor: 'white',
 		width: '100%',
-		flex: 1, 
-		marginTop: 100, 
-		justifyContent: 'flex-start', 
+		flex: 1,
+		marginTop: 100,
+		justifyContent: 'flex-start',
 		alignItems: 'center',
 	},
 	username: {
@@ -370,9 +399,13 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		minHeight: 90,
 		maxHeight: 90,
-		marginBottom: 20,
+		marginBottom: 5,
 		marginTop: 20,
 		borderWidth: 0,
 		backgroundColor: 'rgba(0,0,0,0.1)',
+	},
+	updateBioButton: {
+		backgroundColor: 'rgb(32, 137, 220)',
+		padding: 10,
 	},
 });
