@@ -32,6 +32,9 @@ export default function ProfileScreen() {
 
 	const [searchResults, setSearchResults] = useState([]);
 	const [searchQuery, setSearchQuery] = useState(' ');
+	const [followersCount, setFollowerCount] = useState(0);
+	const [followingCount, setFollowingCount] = useState(0);
+	const [postCount, setPostCount] = useState(0);
 
 	const [user, setUser] = useContext(UserContext);
 	const [bio, setBio] = useState('');
@@ -44,13 +47,11 @@ export default function ProfileScreen() {
 	const [showMore3, setShowMore3] = useState(false);
 
 	useEffect(() => {
+		// Fetch follower and following counts
+		fetchFollowerCount();
+		fetchFollowingCount();
+		fetchPostCount();
 		// Fetch the user's bio when the component mounts
-		const fetchBio = async () => {
-			const userData = await firebase.getUserInfo(user.uid);
-			if (userData && userData.bio) {
-				setBio(userData.bio);
-			}
-		};
 		fetchBio();
 	}, []);
 
@@ -174,6 +175,43 @@ export default function ProfileScreen() {
 		}
 	};
 
+	const fetchFollowerCount = async () => {
+		try {
+			// Call Firebase method to get follower count
+			const count = await firebase.getFollowerCount(user.uid);
+			setFollowerCount(count);
+		} catch (error) {
+			console.error('Error fetching follower count:', error);
+		}
+	};
+
+	const fetchFollowingCount = async () => {
+		try {
+			// Call Firebase method to get following count
+			const count = await firebase.getFollowingCount(user.uid);
+			setFollowingCount(count);
+		} catch (error) {
+			console.error('Error fetching following count:', error);
+		}
+	};
+
+	const fetchPostCount = async () => {
+		try {
+			// Call Firebase method to get post count
+			const count = await firebase.getPostCount(user.uid);
+			setPostCount(count);
+		} catch (error) {
+			console.error('Error fetching post count:', error);
+		}
+	};
+
+	const fetchBio = async () => {
+		const userData = await firebase.getUserInfo(user.uid);
+		if (userData && userData.bio) {
+			setBio(userData.bio);
+		}
+	};
+
 	const updateBio = async () => {
 		// Update the bio in the backend
 		const success = await firebase.updateUserBio(user.uid, bio);
@@ -214,11 +252,11 @@ export default function ProfileScreen() {
 				<Text style={styles.username}>{user.username}</Text>
 				<View style={styles.ffContainer}>
 					<View>
-						<Text style={styles.count}>425</Text>
+						<Text style={styles.count}>{followersCount}</Text>
 						<Text>Followers</Text>
 					</View>
 					<View>
-						<Text style={styles.count}>437</Text>
+						<Text style={styles.count}>{followingCount}</Text>
 						<Text>Following</Text>
 					</View>
 					<View>
@@ -226,7 +264,7 @@ export default function ProfileScreen() {
 						<Text>Books</Text>
 					</View>
 					<View>
-						<Text style={styles.count}>29</Text>
+						<Text style={styles.count}>{postCount}</Text>
 						<Text>Posts</Text>
 					</View>
 				</View>

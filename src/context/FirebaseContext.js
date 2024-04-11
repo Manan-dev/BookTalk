@@ -382,6 +382,96 @@ const Firebase = {
 				console.log('Error @resetPassword: ', errorCode, errorMessage);
 			});
 	},
+	checkFollowStatus: async (currentUserId, profileUserId) => {
+		try {
+			const docSnapshot = await getDoc(
+				doc(db, `followers/${currentUserId}/following/${profileUserId}`)
+			);
+			return docSnapshot.exists();
+		} catch (error) {
+			console.error('Error checking follow status:', error);
+			return false;
+		}
+	},
+
+	followUser: async profileUserId => {
+		try {
+			const currentUserId = Firebase.getCurrentUser().uid;
+			const followingRef = doc(
+				db,
+				`followers/${currentUserId}/following/${profileUserId}`
+			);
+			const followersRef = doc(
+				db,
+				`followers/${profileUserId}/followers/${currentUserId}`
+			);
+			await Promise.all([
+				setDoc(followingRef, { timestamp: serverTimestamp() }),
+				setDoc(followersRef, { timestamp: serverTimestamp() }),
+			]);
+			console.log('User followed successfully!');
+		} catch (error) {
+			console.error('Error following user:', error);
+		}
+	},
+
+	unfollowUser: async profileUserId => {
+		try {
+			const currentUserId = Firebase.getCurrentUser().uid;
+			const followingRef = doc(
+				db,
+				`followers/${currentUserId}/following/${profileUserId}`
+			);
+			const followersRef = doc(
+				db,
+				`followers/${profileUserId}/followers/${currentUserId}`
+			);
+			await Promise.all([deleteDoc(followingRef), deleteDoc(followersRef)]);
+			console.log('User unfollowed successfully!');
+		} catch (error) {
+			console.error('Error unfollowing user:', error);
+		}
+	},
+	getFollowerCount: async userId => {
+		try {
+			// Query the 'followers' collection for the specified user
+			const followersSnapshot = await getDocs(
+				collection(db, `followers/${userId}/followers`)
+			);
+			// Return the number of followers
+			return followersSnapshot.size;
+		} catch (error) {
+			console.error('Error fetching follower count:', error);
+			throw error;
+		}
+	},
+
+	getFollowingCount: async userId => {
+		try {
+			// Query the 'following' collection for the specified user
+			const followingSnapshot = await getDocs(
+				collection(db, `followers/${userId}/following`)
+			);
+			// Return the number of users the specified user is following
+			return followingSnapshot.size;
+		} catch (error) {
+			console.error('Error fetching following count:', error);
+			throw error;
+		}
+	},
+	getPostCount: async userId => {
+		try {
+			// Query the 'posts' collection for the specified user
+			const postsSnapshot = await getDocs(
+				collection(db, `users/${userId}/posts`)
+			);
+			// Return the number of posts
+			return postsSnapshot.size;
+		} catch (error) {
+			console.error('Error fetching post count:', error);
+			throw error;
+		}
+	},
 };
 
 const generateChatId = (userId1, userId2) => {

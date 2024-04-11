@@ -7,6 +7,7 @@ import CreatePostScreen from '../screens/CreatePostScreen';
 import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
 import SearchScreen from '../screens/SearchScreen';
+import SecondaryProfileScreen from '../screens/SecondaryProfileScreen';
 import ProfileStackNavigator from './ProfileStackNavigator';
 
 export default MainStackScreens = () => {
@@ -68,6 +69,11 @@ export default MainStackScreens = () => {
 						<Ionicons name="ios-person" color={color} size={size} />
 					),
 				}}
+			/>
+			<MainStack.Screen
+				name="SecondaryProfile"
+				component={SecondaryProfileScreen}
+				options={{ tabBarButton: () => null }}
 			/>
 		</MainStack.Navigator>
 	);
