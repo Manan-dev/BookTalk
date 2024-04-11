@@ -459,6 +459,19 @@ const Firebase = {
 			throw error;
 		}
 	},
+	getPostCount: async userId => {
+		try {
+			// Query the 'posts' collection for the specified user
+			const postsSnapshot = await getDocs(
+				collection(db, `users/${userId}/posts`)
+			);
+			// Return the number of posts
+			return postsSnapshot.size;
+		} catch (error) {
+			console.error('Error fetching post count:', error);
+			throw error;
+		}
+	},
 };
 
 const generateChatId = (userId1, userId2) => {

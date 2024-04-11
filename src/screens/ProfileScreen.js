@@ -34,6 +34,7 @@ export default function ProfileScreen() {
 	const [searchQuery, setSearchQuery] = useState(' ');
 	const [followersCount, setFollowerCount] = useState(0);
 	const [followingCount, setFollowingCount] = useState(0);
+	const [postCount, setPostCount] = useState(0);
 
 	const [user, setUser] = useContext(UserContext);
 	const [bio, setBio] = useState('');
@@ -49,6 +50,7 @@ export default function ProfileScreen() {
 		// Fetch follower and following counts
 		fetchFollowerCount();
 		fetchFollowingCount();
+		fetchPostCount();
 		// Fetch the user's bio when the component mounts
 		fetchBio();
 	}, []);
@@ -193,6 +195,16 @@ export default function ProfileScreen() {
 		}
 	};
 
+	const fetchPostCount = async () => {
+		try {
+			// Call Firebase method to get post count
+			const count = await firebase.getPostCount(user.uid);
+			setPostCount(count);
+		} catch (error) {
+			console.error('Error fetching post count:', error);
+		}
+	};
+
 	const fetchBio = async () => {
 		const userData = await firebase.getUserInfo(user.uid);
 		if (userData && userData.bio) {
@@ -252,7 +264,7 @@ export default function ProfileScreen() {
 						<Text>Books</Text>
 					</View>
 					<View>
-						<Text style={styles.count}>29</Text>
+						<Text style={styles.count}>{postCount}</Text>
 						<Text>Posts</Text>
 					</View>
 				</View>
