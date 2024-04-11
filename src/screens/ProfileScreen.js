@@ -50,12 +50,6 @@ export default function ProfileScreen() {
 		fetchFollowerCount();
 		fetchFollowingCount();
 		// Fetch the user's bio when the component mounts
-		const fetchBio = async () => {
-			const userData = await firebase.getUserInfo(user.uid);
-			if (userData && userData.bio) {
-				setBio(userData.bio);
-			}
-		};
 		fetchBio();
 	}, []);
 
@@ -196,8 +190,16 @@ export default function ProfileScreen() {
 			setFollowingCount(count);
 		} catch (error) {
 			console.error('Error fetching following count:', error);
-    }
-  };
+		}
+	};
+
+	const fetchBio = async () => {
+		const userData = await firebase.getUserInfo(user.uid);
+		if (userData && userData.bio) {
+			setBio(userData.bio);
+		}
+	};
+
 	const updateBio = async () => {
 		// Update the bio in the backend
 		const success = await firebase.updateUserBio(user.uid, bio);
