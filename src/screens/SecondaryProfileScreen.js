@@ -19,7 +19,7 @@ const SecondaryProfileScreen = ({ route }) => {
 			}
 		};
 		checkIfFollowing();
-	}, []);
+	}, [user.userId]);
 
 	const handleFollowToggle = async () => {
 		if (isFollowing) {

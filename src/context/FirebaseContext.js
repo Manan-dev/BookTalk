@@ -372,7 +372,7 @@ const Firebase = {
 	checkFollowStatus: async (currentUserId, profileUserId) => {
 		try {
 			const docSnapshot = await getDoc(
-				doc(db, `followers/${profileUserId}/following/${currentUserId}`)
+				doc(db, `followers/${currentUserId}/following/${profileUserId}`)
 			);
 			return docSnapshot.exists();
 		} catch (error) {
@@ -407,11 +407,11 @@ const Firebase = {
 			const currentUserId = Firebase.getCurrentUser().uid;
 			const followingRef = doc(
 				db,
-				`followers/${profileUserId}/following/${currentUserId}`
+				`followers/${currentUserId}/following/${profileUserId}`
 			);
 			const followersRef = doc(
 				db,
-				`followers/${currentUserId}/followers/${profileUserId}`
+				`followers/${profileUserId}/followers/${currentUserId}`
 			);
 			await Promise.all([deleteDoc(followingRef), deleteDoc(followersRef)]);
 			console.log('User unfollowed successfully!');
