@@ -49,9 +49,13 @@ const Firebase = {
 			await createUserWithEmailAndPassword(auth, user.email, user.password);
 			const uid = Firebase.getCurrentUser().uid;
 
+			const profilePhotoUrl =
+				user.profilePhotoUrl || 'https://www.gravatar.com/avatar/000?d=mp';
+
 			await setDoc(doc(db, 'users', uid), {
 				username: user.username,
 				email: user.email,
+				profilePhotoUrl: String(profilePhotoUrl),
 			});
 
 			delete user.password;
@@ -84,6 +88,15 @@ const Firebase = {
 			return url;
 		} catch (error) {
 			console.log('Error @uploadProfilePhoto: ', error.message);
+		}
+	},
+	updateUserBio: async (uid, bio) => {
+		try {
+			await setDoc(doc(db, 'users', uid), { bio }, { merge: true });
+			return true;
+		} catch (error) {
+			console.log('Error updating user bio: ', error.message);
+			return false;
 		}
 	},
 	getBlob: async uri => {

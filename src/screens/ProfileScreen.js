@@ -36,6 +36,7 @@ export default function ProfileScreen() {
 	const [followingCount, setFollowingCount] = useState(0);
 
 	const [user, setUser] = useContext(UserContext);
+	const [bio, setBio] = useState('');
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [isModalVisible1, setModalVisible1] = useState(false);
 	const firebase = useContext(FirebaseContext);
@@ -48,6 +49,14 @@ export default function ProfileScreen() {
 		// Fetch follower and following counts
 		fetchFollowerCount();
 		fetchFollowingCount();
+		// Fetch the user's bio when the component mounts
+		const fetchBio = async () => {
+			const userData = await firebase.getUserInfo(user.uid);
+			if (userData && userData.bio) {
+				setBio(userData.bio);
+			}
+		};
+		fetchBio();
 	}, []);
 
 	const ellipsisClicked = () => {
@@ -187,6 +196,17 @@ export default function ProfileScreen() {
 			setFollowingCount(count);
 		} catch (error) {
 			console.error('Error fetching following count:', error);
+    }
+  };
+	const updateBio = async () => {
+		// Update the bio in the backend
+		const success = await firebase.updateUserBio(user.uid, bio);
+		if (success) {
+			// Update the local state with the new bio
+			setUser(prevUser => ({ ...prevUser, bio }));
+			console.log('Bio updated successfully');
+		} else {
+			console.log('Failed to update bio');
 		}
 	};
 	return (
@@ -209,11 +229,9 @@ export default function ProfileScreen() {
 							style={styles.selectedProfilePic}
 						/>
 					) : (
-						<Ionicons
-							name="add-circle"
-							size={150}
-							color="#edebeb"
-							style={styles.profilePicIcon}
+						<Image
+							source={{ uri: 'https://www.gravatar.com/avatar/000?d=mp' }}
+							style={styles.selectedProfilePic}
 						/>
 					)}
 				</TouchableOpacity>
@@ -240,8 +258,13 @@ export default function ProfileScreen() {
 					multiline
 					numberOfLines={4}
 					placeholder="Start typing to write your bio!"
+					value={bio}
 					style={styles.bio}
+					onChangeText={setBio}
 				></TextInput>
+				<TouchableOpacity onPress={updateBio} style={styles.updateBioButton}>
+					<Text>Update Bio</Text>
+				</TouchableOpacity>
 				<View>
 					<Carousel
 						carouselData={booksReadTitles}
@@ -400,9 +423,13 @@ const styles = StyleSheet.create({
 		fontSize: 18,
 		minHeight: 90,
 		maxHeight: 90,
-		marginBottom: 20,
+		marginBottom: 5,
 		marginTop: 20,
 		borderWidth: 0,
 		backgroundColor: 'rgba(0,0,0,0.1)',
+	},
+	updateBioButton: {
+		backgroundColor: 'rgb(32, 137, 220)',
+		padding: 10,
 	},
 });
