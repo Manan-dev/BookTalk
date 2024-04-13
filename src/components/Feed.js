@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
 	FlatList,
+	RefreshControl,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
@@ -21,6 +22,7 @@ const Feed = () => {
 	const [newComment, setNewComment] = useState('');
 	const [commentModalVisible, setCommentModalVisible] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -134,6 +136,20 @@ const Feed = () => {
 		</View>
 	);
 
+	const onRefresh = async () => {
+		setRefreshing(true);
+		try {
+			// Fetch the updated posts
+			const fetchedPosts = await firebase.getAllPosts();
+			setPosts(fetchedPosts);
+			console.log('Posts refreshed:', fetchedPosts);
+		} catch (error) {
+			console.error('Error refreshing posts:', error);
+		} finally {
+			setRefreshing(false);
+		}
+	};
+
 	if (loading) {
 		return (
 			<View style={styles.loadingContainer}>
@@ -148,6 +164,9 @@ const Feed = () => {
 				data={posts}
 				keyExtractor={item => item.id}
 				renderItem={renderItem}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
 			/>
 		</View>
 	);
