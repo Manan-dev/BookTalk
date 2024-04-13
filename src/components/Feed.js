@@ -142,7 +142,6 @@ const Feed = () => {
 			// Fetch the updated posts
 			const fetchedPosts = await firebase.getAllPosts();
 			setPosts(fetchedPosts);
-			console.log('Posts refreshed:', fetchedPosts);
 		} catch (error) {
 			console.error('Error refreshing posts:', error);
 		} finally {
