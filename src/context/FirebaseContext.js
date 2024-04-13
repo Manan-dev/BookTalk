@@ -247,6 +247,7 @@ const Firebase = {
 				caption: postText || '',
 				imageURL: mediaUrls[0] || '',
 				book: mergedResults[0]?.book || '',
+				createdAt: serverTimestamp(),
 			};
 
 			// Add the new post document to the 'posts' subcollection of the current user
