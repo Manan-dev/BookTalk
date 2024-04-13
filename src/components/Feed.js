@@ -7,13 +7,11 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import Modal from 'react-native-modal';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 import Post from './Post';
 
 const Feed = () => {
-	const [isModalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [postLikeState, setPostLikeState] = useState({});
 	const [user, _] = React.useContext(UserContext);
@@ -77,11 +75,6 @@ const Feed = () => {
 		}
 	};
 
-	const ellipsisClicked = item => {
-		setSelectedPost(item);
-		setModalVisible(true);
-	};
-
 	const addComment = (postId, newComment, postCreatorUserId) => {
 		if (!newComment) return;
 		const currentUserComment = {
@@ -115,7 +108,6 @@ const Feed = () => {
 			item={item}
 			postCreatorUserId={item.userId}
 			toggleLike={postId => toggleLike(postId, item.userId)}
-			ellipsisClicked={ellipsisClicked}
 			addCommentModal={addCommentModal}
 			commentModalVisible={commentModalVisible}
 			hideCommentModal={hideCommentModal}
@@ -130,10 +122,6 @@ const Feed = () => {
 			postLikeState={postLikeState}
 		/>
 	);
-
-	const hideModal = () => {
-		setModalVisible(false);
-	};
 
 	const renderDropdownOptions = () => (
 		<View style={styles.dropdownContainer}>
@@ -161,9 +149,6 @@ const Feed = () => {
 				keyExtractor={item => item.id}
 				renderItem={renderItem}
 			/>
-			<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>
-				{renderDropdownOptions()}
-			</Modal>
 		</View>
 	);
 };
