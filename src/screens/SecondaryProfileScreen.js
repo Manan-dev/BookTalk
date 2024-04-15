@@ -4,6 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import React, { useContext, useEffect, useState } from 'react';
 import {
 	Image,
+	RefreshControl,
 	ScrollView,
 	StyleSheet,
 	Text,
@@ -27,6 +28,7 @@ const SecondaryProfileScreen = ({ route }) => {
 	const [postCount, setPostCount] = useState(0);
 	const [bio, setBio] = useState('');
 	const [showMore, setShowMore] = useState(false);
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
 		fetchFollowerCount();
@@ -105,8 +107,29 @@ const SecondaryProfileScreen = ({ route }) => {
 		navigation.goBack();
 	};
 
+	const onRefresh = async () => {
+		setRefreshing(true);
+		try {
+			await Promise.all([
+				fetchFollowerCount(),
+				fetchFollowingCount(),
+				fetchPostCount(),
+				fetchBio(),
+			]);
+		} catch (error) {
+			console.error('Error refreshing:', error);
+		} finally {
+			setRefreshing(false);
+		}
+	};
+
 	return (
-		<ScrollView contentContainerStyle={styles.container}>
+		<ScrollView
+			contentContainerStyle={styles.container}
+			refreshControl={
+				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+			}
+		>
 			<View style={styles.backButtonContainer}>
 				<TouchableOpacity onPress={handleBackNavigation}>
 					<Ionicons name="arrow-back" size={20} style={styles.icon} />
