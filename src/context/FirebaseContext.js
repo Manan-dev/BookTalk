@@ -16,7 +16,9 @@ import {
 	getDoc,
 	getDocs,
 	getFirestore,
+	limit,
 	onSnapshot,
+	orderBy,
 	query,
 	serverTimestamp,
 	setDoc,
@@ -187,21 +189,45 @@ const Firebase = {
 				)
 			);
 
-			const chatsData = chatsQuerySnapshot.docs.map(doc => {
+			// Get chat data
+			const chatsData = chatsQuerySnapshot.docs.map(async doc => {
 				const chatData = doc.data();
 				const chatId = doc.id;
 				// Filter out the current user from the users array to get the recipientId
 				const recipientId = chatData.users.filter(
 					userId => userId !== currentUserId
 				)[0];
+
+				// Get last message for each chat
+				const lastMessageSnapshot = await getDocs(
+					query(
+						collection(db, `chats/${chatId}/messages`),
+						orderBy('timestamp', 'desc'),
+						limit(1)
+					)
+				);
+
+				let lastMessage = null;
+				if (!lastMessageSnapshot.empty) {
+					const lastMessageDoc = lastMessageSnapshot.docs[0];
+					lastMessage = {
+						id: lastMessageDoc.id,
+						...lastMessageDoc.data(),
+					};
+				}
+
 				return {
 					chatId,
 					recipientId,
+					lastMessage,
 				};
 			});
 
+			// Wait for all chat data to be resolved
+			const resolvedChatsData = await Promise.all(chatsData);
+
 			// Fetch recipient data for each chat
-			const recipientDataPromises = chatsData.map(chat =>
+			const recipientDataPromises = resolvedChatsData.map(chat =>
 				getDoc(doc(db, 'users', chat.recipientId))
 			);
 			const recipientDataDocs = await Promise.all(recipientDataPromises);
@@ -211,7 +237,7 @@ const Firebase = {
 			}));
 
 			// Combine chat data with recipient data
-			const chatsWithRecipientData = chatsData.map((chat, index) => ({
+			const chatsWithRecipientData = resolvedChatsData.map((chat, index) => ({
 				...chat,
 				recipientData: recipientData[index],
 			}));
@@ -222,6 +248,7 @@ const Firebase = {
 			throw error;
 		}
 	},
+
 	getMessagesFromFirestore: async (currentUserId, recipientId, setMessages) => {
 		try {
 			const chatsRef = collection(db, 'chats');

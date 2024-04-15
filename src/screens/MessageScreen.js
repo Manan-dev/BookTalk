@@ -117,11 +117,29 @@ const MessageScreen = ({ navigation }) => {
 						/>
 
 						<View style={styles.chatContent}>
-							<Text style={styles.userName}>{item.recipientData.username}</Text>
-							{/* TODO: Implement last message */}
-							<Text style={styles.lastMessage}>{item.lastMessage}</Text>
+							<View>
+								<Text style={styles.userName}>
+									{item.recipientData.username}
+								</Text>
+								<Text style={styles.lastMessage}>
+									{item.lastMessage && item.lastMessage.content}
+								</Text>
+							</View>
+							<View style={styles.lastMessageTimeContainer}>
+								<Text style={styles.lastMessageTime}>
+									{item.lastMessage && item.lastMessage.timestamp
+										? new Date(
+												item.lastMessage.timestamp.seconds * 1000 +
+													item.lastMessage.timestamp.nanoseconds / 1000000
+										  ).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+										  })
+										: ''}
+								</Text>
+								<Ionicons name="chevron-forward" size={20} color="#888" />
+							</View>
 						</View>
-						<Text style={styles.lastMessageTime}>{item.lastMessageTime}</Text>
 						{/* Delete icon for edit mode */}
 						{editMode && (
 							<TouchableOpacity onPress={() => handlleDeleteChat(item.chatId)}>
@@ -179,7 +197,6 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 	edit: {
-		// fontWeight: 'bold',
 		fontSize: 16,
 		color: '#E9446A',
 	},
@@ -196,9 +213,6 @@ const styles = StyleSheet.create({
 		borderRadius: 25,
 		marginRight: 10,
 	},
-	chatContent: {
-		flex: 1,
-	},
 
 	userInfo: {
 		flex: 1,
@@ -210,12 +224,23 @@ const styles = StyleSheet.create({
 	userMessage: {
 		color: '#888',
 	},
-	lastMessage: {
-		color: '#888',
+	chatContent: {
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginRight: 10,
 	},
+
+	lastMessageTimeContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+
 	lastMessageTime: {
 		fontSize: 12,
 		color: '#888',
+		marginRight: 5,
 	},
 	messageInputContainer: {
 		flexDirection: 'row',
