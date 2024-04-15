@@ -10,10 +10,8 @@ import {
 } from 'react-native';
 import { FirebaseContext } from '../context/FirebaseContext';
 
-import { format } from 'date-fns';
-
 const ChatScreen = ({ route, navigation }) => {
-	const { userId, userName } = route.params;
+	const { currentUserId, recepientId } = route.params;
 	const firebase = useContext(FirebaseContext);
 	const flatListRef = useRef(null); // Reference for FlatList
 
@@ -28,30 +26,45 @@ const ChatScreen = ({ route, navigation }) => {
 
 		try {
 			// Add message to Firestore
-			await firebase.sendMessage(userId, userName, messageInput);
+			await firebase.sendMessage(currentUserId, recepientId, messageInput);
 			// Clear message input
 			setMessageInput('');
 		} catch (error) {
 			console.error('Error sending message:', error);
 		}
 	};
-
 	useEffect(() => {
-		// Subscribe to messages for the current chat from Firestore
-		const unsubscribe = firebase.getMessagesFromFirestore(userId, setMessages);
+		// Define an asynchronous function inside the useEffect
+		const fetchMessagesAndSubscribe = async () => {
+			try {
+				// Subscribe to messages for the current chat from Firestore
+				const unsubscribe = await firebase.getMessagesFromFirestore(
+					currentUserId,
+					recepientId,
+					setMessages
+				);
 
-		return () => {
-			// Unsubscribe from Firestore when component unmounts
-			unsubscribe();
+				// Return the unsubscribe function
+				return unsubscribe;
+			} catch (error) {
+				console.error('Error subscribing to messages:', error);
+				throw error; // Propagate the error to the caller
+			}
 		};
-	}, [firebase, userId]);
 
-	useEffect(() => {
-		// Scroll to the end of the list when messages change
-		if (flatListRef.current) {
-			flatListRef.current.scrollToEnd({ animated: true });
-		}
-	}, [messages]);
+		// Call the asynchronous function immediately
+		fetchMessagesAndSubscribe()
+			.then(unsubscribe => {
+				// Cleanup function
+				return () => {
+					// Unsubscribe from messages when the component unmounts
+					unsubscribe();
+				};
+			})
+			.catch(error => {
+				console.error('Error subscribing to messages:', error);
+			});
+	}, []);
 
 	return (
 		<View style={styles.container}>
@@ -59,31 +72,51 @@ const ChatScreen = ({ route, navigation }) => {
 				<TouchableOpacity onPress={() => navigation.navigate('MessageScreen')}>
 					<Ionicons name="arrow-back" size={20} style={styles.icon} />
 				</TouchableOpacity>
-				<Text style={styles.boldText}>{userName}</Text>
+				{messages.length > 0 && (
+					<Text style={styles.boldText}>{messages[0].recipientName}</Text>
+				)}
 			</View>
 
 			<FlatList
 				ref={flatListRef}
-				data={messages.sort((a, b) => a.timestamp - b.timestamp)}
-				keyExtractor={item => item.id}
-				renderItem={({ item }) => (
-					<View
-						style={[
-							styles.messageContainer,
-							item.senderId !== userId
-								? styles.senderMessage
-								: styles.receiverMessage,
-						]}
-					>
-						<Text style={styles.senderName}>
-							{item.senderId !== userId ? 'You' : item.senderName}
-						</Text>
-						<Text style={styles.messageContent}>{item.message}</Text>
-						<Text style={styles.timestamp}>
-							{format(item.timestamp, 'dd/MM HH:mm')}
-						</Text>
-					</View>
-				)}
+				data={messages}
+				keyExtractor={(item, index) => `${item.id}-${index}`}
+				renderItem={({ item }) =>
+					// Conditionally render the outermost view based on item.content
+					item.content ? (
+						<View
+							style={[
+								styles.messageContainer,
+								item.senderId === currentUserId
+									? styles.senderMessage
+									: styles.receiverMessage,
+							]}
+						>
+							<Text style={styles.senderName}>
+								{item.senderId === currentUserId ? 'You' : item.senderName}
+							</Text>
+							<Text style={styles.messageContent}>{item.content}</Text>
+							{item.timestamp && (
+								<Text style={styles.timestamp}>
+									{item.timestamp
+										? new Date(
+												item.timestamp.seconds * 1000 +
+													item.timestamp.nanoseconds / 1000000
+										  ).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+										  })
+										: ''}
+								</Text>
+							)}
+						</View>
+					) : null
+				}
+				onContentSizeChange={() => {
+					setTimeout(() => {
+						flatListRef.current.scrollToEnd({ animated: true });
+					}, 100);
+				}}
 			/>
 
 			<View style={styles.messageInputContainer}>

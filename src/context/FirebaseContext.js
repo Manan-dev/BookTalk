@@ -136,26 +136,167 @@ const Firebase = {
 		}
 		return false;
 	},
-	sendMessage: async (recipientId, recipientName, message) => {
+	sendMessage: async (currentUserId, recipientUserId, messageContent) => {
 		try {
-			const senderId = Firebase.getCurrentUser().uid;
-			const chatId = generateChatId(senderId, recipientId);
-			const userInfo = await Firebase.getUserInfo(senderId);
+			// Query to find an existing chat between the current user and the recipient
+			const chatQuerySnapshot = await getDocs(
+				query(
+					collection(db, 'chats'),
+					where('users', 'array-contains', currentUserId)
+				)
+			);
 
-			await addDoc(collection(db, 'chats', chatId), {
-				senderId,
-				recipientId,
-				senderName: userInfo.username,
-				message,
-				recipientName,
-				timestamp: new Date(),
+			let chatId;
+
+			// Check if there's an existing chat where the recipient is the sender
+			let existingChat = chatQuerySnapshot.docs.find(doc => {
+				const chatData = doc.data();
+				return chatData.users.includes(recipientUserId);
 			});
-			console.log('Message sent from:', senderId, 'to:', recipientId);
+
+			// If there's no existing chat, create a new one
+			if (!existingChat) {
+				const newChatRef = await addDoc(collection(db, 'chats'), {
+					users: [currentUserId, recipientUserId],
+				});
+				chatId = newChatRef.id;
+			} else {
+				chatId = existingChat.id;
+			}
+
+			// Add the message to the chat's messages subcollection
+			await addDoc(collection(db, `chats/${chatId}/messages`), {
+				senderId: currentUserId,
+				timestamp: serverTimestamp(),
+				content: messageContent,
+			});
+
+			console.log('Message sent successfully!');
 		} catch (error) {
-			console.log('Error @sendMessage: ', error.message);
+			console.error('Error sending message:', error);
 		}
 	},
 
+	getChatsForCurrentUser: async currentUserId => {
+		try {
+			// Query to fetch chats where the current user is participating
+			const chatsQuerySnapshot = await getDocs(
+				query(
+					collection(db, 'chats'),
+					where('users', 'array-contains', currentUserId)
+				)
+			);
+
+			const chatsData = chatsQuerySnapshot.docs.map(doc => {
+				const chatData = doc.data();
+				const chatId = doc.id;
+				// Filter out the current user from the users array to get the recipientId
+				const recipientId = chatData.users.filter(
+					userId => userId !== currentUserId
+				)[0];
+				return {
+					chatId,
+					recipientId,
+				};
+			});
+
+			// Fetch recipient data for each chat
+			const recipientDataPromises = chatsData.map(chat =>
+				getDoc(doc(db, 'users', chat.recipientId))
+			);
+			const recipientDataDocs = await Promise.all(recipientDataPromises);
+			const recipientData = recipientDataDocs.map(doc => ({
+				id: doc.id,
+				...doc.data(),
+			}));
+
+			// Combine chat data with recipient data
+			const chatsWithRecipientData = chatsData.map((chat, index) => ({
+				...chat,
+				recipientData: recipientData[index],
+			}));
+
+			return chatsWithRecipientData;
+		} catch (error) {
+			console.error('Error fetching chats for current user:', error);
+			throw error;
+		}
+	},
+	getMessagesFromFirestore: async (currentUserId, recipientId, setMessages) => {
+		try {
+			const chatsRef = collection(db, 'chats');
+
+			// Query to find the specific chat between the current user and the recipient
+			const chatQuerySnapshot = await getDocs(
+				query(chatsRef, where('users', 'array-contains', currentUserId))
+			);
+
+			// filter out the chat with the recipient
+			let chatDoc;
+			// Filter out the chat with the recipient
+			chatQuerySnapshot.forEach(doc => {
+				const chatData = doc.data();
+				if (chatData.users.includes(recipientId)) {
+					chatDoc = doc;
+				}
+			});
+
+			// If the chat exists, subscribe to messages
+			if (chatDoc) {
+				const chatId = chatDoc.id;
+				const messagesRef = collection(db, `chats/${chatId}/messages`);
+
+				// Subscribe to messages for the current chat
+				const unsubscribe = onSnapshot(messagesRef, async snapshot => {
+					const chatMessages = await Promise.all(
+						snapshot.docs.map(async doc => {
+							const messageData = doc.data();
+
+							const senderName =
+								currentUserId === messageData.senderId
+									? 'You'
+									: await Firebase.getUserInfo(messageData.senderId).then(
+											data => data.username
+									  );
+							const recipientName = await Firebase.getUserInfo(
+								recipientId
+							).then(data => data.username);
+							return {
+								id: doc.id,
+								senderName,
+								recipientName,
+								...messageData,
+							};
+						})
+					);
+					chatMessages.sort((a, b) => a.timestamp - b.timestamp); // Sort messages by timestamp
+					setMessages(chatMessages);
+				});
+
+				// Return the unsubscribe function
+				return unsubscribe;
+			} else {
+				console.log('Chat does not exist');
+				// FIX: Property 'recipientName' doesn't exist
+				const recipientName = await Firebase.getUserInfo(recipientId).then(
+					data => data.username
+				);
+				setMessages([{ senderName: 'You', recipientName: recipientName }]);
+				return () => {}; // Return an empty function as unsubscribe
+			}
+		} catch (error) {
+			console.error('Error fetching messages from Firestore:', error);
+			throw error;
+		}
+	},
+	deleteChat: async chatId => {
+		try {
+			await deleteDoc(doc(db, 'chats', chatId));
+			console.log('Chat deleted successfully!');
+		} catch (error) {
+			console.error('Error deleting chat:', error);
+		}
+	},
 	getAllUsersFromFirestore: async () => {
 		try {
 			const usersSnapshot = await getDocs(collection(db, 'users'));
@@ -173,46 +314,6 @@ const Firebase = {
 			console.error('Error fetching all users:', error);
 			throw error;
 		}
-	},
-
-	getMessagesForChat: async chatId => {
-		try {
-			const chatRef = collection(db, 'chats', chatId);
-			const queryRef = orderBy(query(chatRef, 'timestamp'), 'desc'); // Rename the variable to avoid conflict
-			const messagesSnapshot = await getDocs(queryRef);
-			if (!messagesSnapshot.empty) {
-				const lastMessage = messagesSnapshot.docs[0].data();
-				return {
-					text: lastMessage.message,
-					timestamp: lastMessage.timestamp.toDate().toLocaleString(), // Convert Firestore Timestamp to a readable format
-				};
-			} else {
-				return null;
-			}
-		} catch (error) {
-			console.error('Error fetching messages for chat:', error);
-			throw error;
-		}
-	},
-
-	getMessagesFromFirestore: (recipientId, setMessages) => {
-		const senderId = Firebase.getCurrentUser().uid;
-		const chatId = generateChatId(senderId, recipientId);
-
-		return onSnapshot(collection(db, 'chats', chatId), snapshot => {
-			const messages = [];
-			snapshot.forEach(doc => {
-				const data = doc.data();
-				messages.push({
-					id: doc.id,
-					senderId: data.senderId,
-					message: data.message,
-					senderName: data.senderName,
-					timestamp: data.timestamp.toDate(), // Convert Firestore Timestamp to JavaScript Date
-				});
-			});
-			setMessages(messages);
-		});
 	},
 	addPostForCurrentUser: async (postText, mergedResults) => {
 		try {
