@@ -175,6 +175,7 @@ const SecondaryProfileScreen = ({ route }) => {
 				numberOfLines={4}
 				placeholder="Start typing to write your bio!"
 				value={bio}
+				editable={false}
 				style={styles.bio}
 				onChangeText={setBio}
 			></TextInput>
