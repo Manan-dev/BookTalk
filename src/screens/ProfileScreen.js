@@ -312,6 +312,7 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
+						isMyProfile={true}
 					/>
 				</View>
 				<View>
@@ -323,6 +324,7 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
+						isMyProfile={true}
 					/>
 				</View>
 				<View>
@@ -334,6 +336,7 @@ export default function ProfileScreen() {
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
+						isMyProfile={true}
 					/>
 				</View>
 				<Modal
@@ -457,7 +460,8 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 	},
 	bio: {
-		width: '90%',
+		width: '95%',
+		padding: 10,
 		fontSize: 18,
 		minHeight: 90,
 		maxHeight: 90,
