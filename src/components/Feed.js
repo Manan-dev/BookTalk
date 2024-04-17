@@ -2,18 +2,17 @@ import React, { useEffect, useState } from 'react';
 import {
 	ActivityIndicator,
 	FlatList,
+	RefreshControl,
 	StyleSheet,
 	Text,
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import Modal from 'react-native-modal';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
 import Post from './Post';
 
 const Feed = () => {
-	const [isModalVisible, setModalVisible] = useState(false);
 	const [selectedPost, setSelectedPost] = useState(null);
 	const [postLikeState, setPostLikeState] = useState({});
 	const [user, _] = React.useContext(UserContext);
@@ -23,6 +22,7 @@ const Feed = () => {
 	const [newComment, setNewComment] = useState('');
 	const [commentModalVisible, setCommentModalVisible] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const [refreshing, setRefreshing] = useState(false);
 
 	useEffect(() => {
 		const fetchPosts = async () => {
@@ -77,11 +77,6 @@ const Feed = () => {
 		}
 	};
 
-	const ellipsisClicked = item => {
-		setSelectedPost(item);
-		setModalVisible(true);
-	};
-
 	const addComment = (postId, newComment, postCreatorUserId) => {
 		if (!newComment) return;
 		const currentUserComment = {
@@ -115,7 +110,6 @@ const Feed = () => {
 			item={item}
 			postCreatorUserId={item.userId}
 			toggleLike={postId => toggleLike(postId, item.userId)}
-			ellipsisClicked={ellipsisClicked}
 			addCommentModal={addCommentModal}
 			commentModalVisible={commentModalVisible}
 			hideCommentModal={hideCommentModal}
@@ -131,10 +125,6 @@ const Feed = () => {
 		/>
 	);
 
-	const hideModal = () => {
-		setModalVisible(false);
-	};
-
 	const renderDropdownOptions = () => (
 		<View style={styles.dropdownContainer}>
 			<TouchableOpacity
@@ -145,6 +135,19 @@ const Feed = () => {
 			</TouchableOpacity>
 		</View>
 	);
+
+	const onRefresh = async () => {
+		setRefreshing(true);
+		try {
+			// Fetch the updated posts
+			const fetchedPosts = await firebase.getAllPosts();
+			setPosts(fetchedPosts);
+		} catch (error) {
+			console.error('Error refreshing posts:', error);
+		} finally {
+			setRefreshing(false);
+		}
+	};
 
 	if (loading) {
 		return (
@@ -160,10 +163,10 @@ const Feed = () => {
 				data={posts}
 				keyExtractor={item => item.id}
 				renderItem={renderItem}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+				}
 			/>
-			<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>
-				{renderDropdownOptions()}
-			</Modal>
 		</View>
 	);
 };

@@ -375,6 +375,7 @@ const Firebase = {
 				caption: postText || '',
 				imageURL: mediaUrls[0] || '',
 				book: mergedResults[0]?.book || '',
+				createdAt: serverTimestamp(),
 			};
 
 			// Add the new post document to the 'posts' subcollection of the current user
@@ -438,7 +439,14 @@ const Firebase = {
 			const allPosts = await Promise.all(postsPromises);
 
 			// Flatten the array of arrays into a single array
-			return allPosts.flat();
+			const flattenedPosts = allPosts.flat();
+
+			// Sort the posts by the createdAt property in descending order
+			const sortedPosts = flattenedPosts.sort(
+				(a, b) => b.createdAt - a.createdAt
+			);
+
+			return sortedPosts;
 		} catch (error) {
 			console.error('Error getting posts:', error);
 			return [];

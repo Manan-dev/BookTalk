@@ -9,6 +9,7 @@ import {
 	FlatList,
 	Image,
 	Platform,
+	RefreshControl,
 	ScrollView,
 	Share,
 	StyleSheet,
@@ -35,6 +36,7 @@ export default function ProfileScreen() {
 	const [followersCount, setFollowerCount] = useState(0);
 	const [followingCount, setFollowingCount] = useState(0);
 	const [postCount, setPostCount] = useState(0);
+	const [refreshing, setRefreshing] = useState(false);
 
 	const [user, setUser] = useContext(UserContext);
 	const [bio, setBio] = useState('');
@@ -142,7 +144,7 @@ export default function ProfileScreen() {
 		);
 	};
 
-	handleLogout = async () => {
+	const handleLogout = async () => {
 		const loggedOut = await firebase.logout();
 
 		if (loggedOut) {
@@ -150,7 +152,7 @@ export default function ProfileScreen() {
 		}
 	};
 
-	addProfilePic = async () => {
+	const addProfilePic = async () => {
 		if (Platform.OS !== 'web') {
 			const { status } =
 				await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -223,8 +225,30 @@ export default function ProfileScreen() {
 			console.log('Failed to update bio');
 		}
 	};
+
+	const onRefresh = async () => {
+		setRefreshing(true);
+		try {
+			await Promise.all([
+				fetchFollowerCount(),
+				fetchFollowingCount(),
+				fetchPostCount(),
+				fetchBio(),
+			]);
+		} catch (error) {
+			console.error('Error refreshing:', error);
+		} finally {
+			setRefreshing(false);
+		}
+	};
+
 	return (
-		<ScrollView contentContainerStyle={styles.container}>
+		<ScrollView
+			contentContainerStyle={styles.container}
+			refreshControl={
+				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+			}
+		>
 			<SafeAreaView style={styles.content}>
 				<View style={styles.container}>
 					<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>

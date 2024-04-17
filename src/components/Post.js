@@ -3,6 +3,7 @@ import { useNavigation } from '@react-navigation/native';
 import React from 'react';
 import {
 	Image,
+	Share,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -16,7 +17,6 @@ import Comment from './Comment';
 const Post = ({
 	item,
 	toggleLike,
-	ellipsisClicked,
 	addCommentModal,
 	commentModalVisible,
 	hideCommentModal,
@@ -33,6 +33,25 @@ const Post = ({
 	const navigateToSecondaryProfile = () => {
 		navigation.navigate('SecondaryProfile', { user: item });
 	};
+
+	const onShare = async post => {
+		try {
+			const result = await Share.share({
+				message: `Check out this post by ${post.username}: ${post.caption}`,
+			});
+			if (result.action === Share.sharedAction) {
+				if (result.activityType) {
+					// Shared via activity type
+				} else {
+					// Shared
+				}
+			} else if (result.action === Share.dismissedAction) {
+				// Dismissed
+			}
+		} catch (error) {
+			console.error('Error sharing post:', error.message);
+		}
+	};
 	return (
 		<View style={styles.postContainer}>
 			<View style={styles.topContainer}>
@@ -46,8 +65,8 @@ const Post = ({
 					</View>
 				</TouchableOpacity>
 				<View>
-					<TouchableOpacity onPress={() => ellipsisClicked(item)}>
-						<Ionicons name="ellipsis-horizontal" size={24} color="black" />
+					<TouchableOpacity onPress={() => onShare(item)}>
+						<Ionicons name="share-outline" size={24} color="black" />
 					</TouchableOpacity>
 				</View>
 			</View>
