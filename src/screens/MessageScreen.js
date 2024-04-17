@@ -4,14 +4,15 @@ import React, { useEffect, useState } from 'react';
 import {
 	FlatList,
 	Image,
+	RefreshControl,
 	StyleSheet,
 	Text,
 	TextInput,
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import profileImage from '../../assets/profile.png';
 import { FirebaseContext } from '../context/FirebaseContext';
+import { UserContext } from '../context/UserContext';
 import ChatScreen from './ChatScreen';
 import SearchNewUser from './SearchNewUser';
 
@@ -25,8 +26,11 @@ const MessageScreen = ({ navigation }) => {
 	const [editMode, setEditMode] = useState(false);
 
 	const [chats, setChats] = useState([]);
+	const [refreshing, setRefreshing] = useState(false);
 
 	const firebase = React.useContext(FirebaseContext);
+
+	const [user, _] = React.useContext(UserContext);
 
 	useEffect(() => {
 		fetchChats();
@@ -34,29 +38,32 @@ const MessageScreen = ({ navigation }) => {
 
 	const fetchChats = async () => {
 		try {
-			const fetchedChats = await firebase.getAllUsersFromFirestore();
-			setChats(fetchedChats);
+			const myChats = await firebase.getChatsForCurrentUser(user.uid);
+			setChats(myChats);
 		} catch (error) {
 			console.error('Error fetching chats:', error);
+		} finally {
+			setRefreshing(false);
 		}
 	};
 
 	// Function to handle delete chat
-	const handlleDeleteChat = userId => {
-		const updatedData = userData.filter(user => user.id !== userId);
-		setUserData(updatedData);
+	const handlleDeleteChat = chatId => {
+		try {
+			firebase.deleteChat(chatId);
+			setChats(chats.filter(chat => chat.chatId !== chatId));
+		} catch (error) {
+			console.error('Error deleting chat:', error);
+		}
 	};
 
-	// Filtered user data based on search input
-	// const filteredUserData = searchInput
-	// 	? userData.filter(user =>
-	// 		user.name.toLowerCase().includes(searchInput.toLowerCase())
-	// 		)
-	// 	: userData;
-	
 	const filteredUserData = searchInput
-        ? chats.filter(chat => chat.username.toLowerCase().includes(searchInput.toLowerCase()))
-        : chats;
+		? chats.filter(chat =>
+				chat.recipientData.username
+					.toLowerCase()
+					.includes(searchInput.toLowerCase())
+		  )
+		: chats;
 
 	return (
 		<View style={styles.container}>
@@ -65,12 +72,10 @@ const MessageScreen = ({ navigation }) => {
 				<TouchableOpacity onPress={() => setEditMode(!editMode)}>
 					<Text style={styles.edit}>{editMode ? 'Done' : 'Edit'}</Text>
 				</TouchableOpacity>
-				
+
 				<Text style={styles.boldText}>Messages</Text>
 
-				<TouchableOpacity
-					onPress={() => navigation.navigate('SearchNewUser')}
-				>
+				<TouchableOpacity onPress={() => navigation.navigate('SearchNewUser')}>
 					<Ionicons name="md-person-add" size={20} style={styles.icon} />
 				</TouchableOpacity>
 			</View>
@@ -94,40 +99,58 @@ const MessageScreen = ({ navigation }) => {
 			{/* List of user chats */}
 			<FlatList
 				data={filteredUserData}
-				keyExtractor={item => item.id}
+				keyExtractor={item => item.chatId}
 				renderItem={({ item }) => (
 					<TouchableOpacity
 						style={styles.chatContainer}
 						onPress={() =>
 							navigation.navigate('ChatScreen', {
-								userId: item.id,
-								userName: item.name,
+								currentUserId: user.uid,
+								recepientId: item.recipientData.id,
 							})
 						}
 					>
 						{/* User profile image on the left */}
-						{/* <Image source={profileImage} style={styles.profileImage} /> */}
- 						<Image source={{ uri: item.profilePhotoUrl }} style={styles.profileImage} />
-
-						{/* User information and message */}
-						{/* <View style={styles.userInfo}>
-							<Text style={styles.userName}>{item.name}</Text>
-							<Text style={styles.userMessage}>{item.message}</Text>
-						</View> */}
+						<Image
+							source={{ uri: item.recipientData.profilePhotoUrl }}
+							style={styles.profileImage}
+						/>
 
 						<View style={styles.chatContent}>
-	                            <Text style={styles.userName}>{item.username}</Text>
-	                           <Text style={styles.lastMessage}>{item.lastMessage}</Text>
-	                    </View>
-						<Text style={styles.lastMessageTime}>{item.lastMessageTime}</Text>
+							<View>
+								<Text style={styles.userName}>
+									{item.recipientData.username}
+								</Text>
+								<Text style={styles.lastMessage}>
+									{item.lastMessage && item.lastMessage.content}
+								</Text>
+							</View>
+							<View style={styles.lastMessageTimeContainer}>
+								<Text style={styles.lastMessageTime}>
+									{item.lastMessage && item.lastMessage.timestamp
+										? new Date(
+												item.lastMessage.timestamp.seconds * 1000 +
+													item.lastMessage.timestamp.nanoseconds / 1000000
+										  ).toLocaleTimeString([], {
+												hour: '2-digit',
+												minute: '2-digit',
+										  })
+										: ''}
+								</Text>
+								<Ionicons name="chevron-forward" size={20} color="#888" />
+							</View>
+						</View>
 						{/* Delete icon for edit mode */}
 						{editMode && (
-							<TouchableOpacity onPress={() => handlleDeleteChat(item.id)}>
+							<TouchableOpacity onPress={() => handlleDeleteChat(item.chatId)}>
 								<Feather name="trash-2" size={20} color="red" />
 							</TouchableOpacity>
 						)}
 					</TouchableOpacity>
 				)}
+				refreshControl={
+					<RefreshControl refreshing={refreshing} onRefresh={fetchChats} />
+				}
 			/>
 		</View>
 	);
@@ -174,7 +197,6 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 	edit: {
-		// fontWeight: 'bold',
 		fontSize: 16,
 		color: '#E9446A',
 	},
@@ -191,9 +213,6 @@ const styles = StyleSheet.create({
 		borderRadius: 25,
 		marginRight: 10,
 	},
-	chatContent: {
-        flex: 1,
-    },
 
 	userInfo: {
 		flex: 1,
@@ -205,13 +224,24 @@ const styles = StyleSheet.create({
 	userMessage: {
 		color: '#888',
 	},
-	lastMessage: {
-        color: '#888',
-    },
-    lastMessageTime: {
-        fontSize: 12,
-        color: '#888',
-    },
+	chatContent: {
+		flex: 1,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginRight: 10,
+	},
+
+	lastMessageTimeContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+
+	lastMessageTime: {
+		fontSize: 12,
+		color: '#888',
+		marginRight: 5,
+	},
 	messageInputContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
@@ -246,7 +276,7 @@ export default () => (
 		<Stack.Screen
 			name="SearchNewUser"
 			component={SearchNewUser}
-			options={{ headerShown: false}}
+			options={{ headerShown: false }}
 		/>
 	</Stack.Navigator>
 );
