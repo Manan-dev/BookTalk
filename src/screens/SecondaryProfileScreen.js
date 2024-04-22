@@ -141,17 +141,19 @@ const SecondaryProfileScreen = ({ route }) => {
 			<Image source={{ uri: user.profilePhotoUrl }} style={styles.profilePic} />
 			<Text style={styles.username}>{user.username}</Text>
 			{/* Display other user information as needed */}
-			<TouchableOpacity
-				style={[
-					styles.followButton,
-					{ backgroundColor: isFollowing ? 'gray' : 'blue' },
-				]}
-				onPress={handleFollowToggle}
-			>
-				<Text style={styles.followButtonText}>
-					{isFollowing ? 'Following' : 'Follow'}
-				</Text>
-			</TouchableOpacity>
+			{user.userId !== firebase.getCurrentUser().uid && (
+				<TouchableOpacity
+					style={[
+						styles.followButton,
+						{ backgroundColor: isFollowing ? 'gray' : 'blue' },
+					]}
+					onPress={handleFollowToggle}
+				>
+					<Text style={styles.followButtonText}>
+						{isFollowing ? 'Following' : 'Follow'}
+					</Text>
+				</TouchableOpacity>
+			)}
 			<View style={styles.ffContainer}>
 				<View>
 					<Text style={styles.count}>{followersCount}</Text>
