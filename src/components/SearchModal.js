@@ -1,7 +1,10 @@
-// SearchModal.js
+import { GOOGLE_BOOKS_API_KEY } from '@env';
+import axios from 'axios';
 import React, { useState } from 'react';
 import {
+	Image,
 	Modal,
+	ScrollView,
 	StyleSheet,
 	Text,
 	TextInput,
@@ -9,11 +12,37 @@ import {
 	View,
 } from 'react-native';
 
-const SearchModal = ({ visible, onClose, onSearch }) => {
+const SearchModal = ({ visible, onClose, onBookSelect }) => {
 	const [query, setQuery] = useState('');
+	const [searchResults, setSearchResults] = useState([]);
 
-	const handleSearch = () => {
-		onSearch(query);
+	const handleSearch = async () => {
+		try {
+			const response = await axios.get(
+				'https://www.googleapis.com/books/v1/volumes',
+				{
+					params: {
+						q: query.trim(),
+						key: GOOGLE_BOOKS_API_KEY,
+					},
+				}
+			);
+
+			const items = response.data.items || [];
+			const results = items.map(item => ({
+				id: item.id,
+				title: item.volumeInfo.title,
+				authors: item.volumeInfo.authors
+					? item.volumeInfo.authors.join(', ')
+					: 'Unknown Author',
+				thumbnail: item.volumeInfo.imageLinks
+					? item.volumeInfo.imageLinks.thumbnail
+					: null,
+			}));
+			setSearchResults(results);
+		} catch (error) {
+			console.error('Error fetching data:', error);
+		}
 	};
 
 	return (
@@ -33,13 +62,22 @@ const SearchModal = ({ visible, onClose, onSearch }) => {
 						<Text style={styles.closeButton}>Close</Text>
 					</TouchableOpacity>
 				</View>
-				{/* Display search results here */}
-				{/* Example: */}
-				{/* <ScrollView>
-					{searchResults.map((item, index) => (
-						<Text key={index}>{item.title}</Text>
+				<ScrollView>
+					{searchResults.map(book => (
+						<TouchableOpacity key={book.id} onPress={() => onBookSelect(book)}>
+							<View style={styles.bookItem}>
+								<Image
+									source={{ uri: book.thumbnail }}
+									style={styles.bookThumbnail}
+								/>
+								<View style={styles.bookInfo}>
+									<Text style={styles.bookTitle}>{book.title}</Text>
+									<Text style={styles.bookAuthors}>{book.authors}</Text>
+								</View>
+							</View>
+						</TouchableOpacity>
 					))}
-				</ScrollView> */}
+				</ScrollView>
 			</View>
 		</Modal>
 	);
@@ -76,6 +114,12 @@ const styles = StyleSheet.create({
 	closeButton: {
 		color: '#E9446A',
 		marginLeft: 10,
+	},
+	bookThumbnail: {
+		width: 120,
+		height: 200,
+		borderRadius: 10,
+		marginRight: 10,
 	},
 });
 

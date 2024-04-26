@@ -1,7 +1,5 @@
-import { GOOGLE_BOOKS_API_KEY } from '@env';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useContext, useState } from 'react';
 import {
@@ -17,50 +15,26 @@ import SearchModal from '../components/SearchModal'; // Import the SearchModal c
 import { FirebaseContext } from '../context/FirebaseContext';
 
 export default function CreatePostScreen() {
-	const [searchResults, setSearchResults] = useState([]);
 	const [postText, setPostText] = useState('');
 	const [media, setMedia] = useState('');
+	const [selectedBook, setSelectedBook] = useState(null);
+	const [isModalVisible, setIsModalVisible] = useState(false);
 	const navigation = useNavigation();
 	const firebase = useContext(FirebaseContext);
-	const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
-	const [search, setSearch] = useState('');
-
-	const handleSearch = async query => {
-		setSearch(query.trim());
-		try {
-			const response = await axios.get(
-				'https://www.googleapis.com/books/v1/volumes',
-				{
-					params: {
-						q: query,
-						key: GOOGLE_BOOKS_API_KEY,
-					},
-				}
-			);
-
-			const items = response.data.items || [];
-			const searchResults = items.map(item => ({
-				title: item.volumeInfo.title,
-				authors: item.volumeInfo.authors
-					? item.volumeInfo.authors.join(', ')
-					: 'Unknown Author',
-				thumbnail: item.volumeInfo.imageLinks
-					? item.volumeInfo.imageLinks.thumbnail
-					: null,
-			}));
-			setSearchResults(searchResults);
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
-	};
 
 	const handlePost = async () => {
 		navigation.goBack();
 		await firebase.addPostForCurrentUser(postText, mergedResults);
 		setPostText('');
 		setMedia('');
-		setSearch('');
-		setSearchResults([]);
+		setSelectedBook(null);
+	};
+
+	const handleCancel = () => {
+		navigation.goBack();
+		setPostText('');
+		setMedia('');
+		setSelectedBook(null);
 	};
 
 	const handleAddMedia = async () => {
@@ -88,10 +62,10 @@ export default function CreatePostScreen() {
 		}
 	};
 
-	const mergedResults = [
-		...(searchResults.map(result => ({ book: result.cover })) || []),
-		{ imageURL: media },
-	];
+	const handleBookSelect = book => {
+		setSelectedBook(book);
+		setIsModalVisible(false);
+	};
 
 	const openModal = () => {
 		setIsModalVisible(true);
@@ -101,13 +75,15 @@ export default function CreatePostScreen() {
 		setIsModalVisible(false);
 	};
 
+	const mergedResults = [
+		...(selectedBook ? [{ book: selectedBook.thumbnail }] : []),
+		{ imageURL: media },
+	];
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity
-					style={styles.headerButton}
-					onPress={() => navigation.goBack()}
-				>
+				<TouchableOpacity style={styles.headerButton} onPress={handleCancel}>
 					<Text style={styles.headerButtonText}>Cancel</Text>
 				</TouchableOpacity>
 				<TouchableOpacity style={styles.headerButton} onPress={handlePost}>
@@ -127,34 +103,34 @@ export default function CreatePostScreen() {
 						<Ionicons name="image-outline" size={24} color="white" />
 					</TouchableOpacity>
 					<TouchableOpacity onPress={openModal} style={styles.searchButton}>
-						{/* Button to open the modal */}
-						<Ionicons name="search" size={24} color="white" style={{}} />
+						<Ionicons name="search" size={24} color="white" />
 						<Text style={styles.searchButtonText}> Search for Books</Text>
 					</TouchableOpacity>
 				</View>
 				<ScrollView horizontal>
-					{mergedResults.map((item, index) => (
-						<TouchableOpacity key={index} onPress={() => console.log(item)}>
-							{item.imageURL ? (
-								<Image
-									source={{ uri: item.imageURL }}
-									style={styles.mediaPreview}
-								/>
-							) : (
-								<Image
-									source={{ uri: item.book }}
-									style={styles.mediaPreview}
-								/>
-							)}
-						</TouchableOpacity>
-					))}
+					{mergedResults.map((item, index) => {
+						return (
+							<TouchableOpacity key={index} onPress={() => console.log(item)}>
+								{item.imageURL ? (
+									<Image
+										source={{ uri: item.imageURL }}
+										style={styles.mediaPreview}
+									/>
+								) : item.book ? (
+									<Image
+										source={{ uri: item.book }}
+										style={styles.mediaPreview}
+									/>
+								) : null}
+							</TouchableOpacity>
+						);
+					})}
 				</ScrollView>
 			</View>
-			{/* Modal for search */}
 			<SearchModal
 				visible={isModalVisible}
 				onClose={closeModal}
-				onSearch={handleSearch}
+				onBookSelect={handleBookSelect}
 			/>
 		</View>
 	);
