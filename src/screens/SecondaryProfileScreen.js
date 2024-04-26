@@ -140,7 +140,7 @@ const SecondaryProfileScreen = ({ route }) => {
 			</View>
 			<Image source={{ uri: user.profilePhotoUrl }} style={styles.profilePic} />
 			<Text style={styles.username}>{user.username}</Text>
-			{/* Display other user information as needed */}
+			{/* Don't let user follow themselves */}
 			{user.userId !== firebase.getCurrentUser().uid && (
 				<TouchableOpacity
 					style={[

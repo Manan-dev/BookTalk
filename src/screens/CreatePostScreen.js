@@ -1,4 +1,4 @@
-import { BOOK_API_KEY } from '@env';
+import { GOOGLE_BOOKS_API_KEY } from '@env';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
@@ -13,7 +13,7 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import SearchBar from '../components/SearchBar';
+import SearchModal from '../components/SearchModal'; // Import the SearchModal component
 import { FirebaseContext } from '../context/FirebaseContext';
 
 export default function CreatePostScreen() {
@@ -21,42 +21,42 @@ export default function CreatePostScreen() {
 	const [postText, setPostText] = useState('');
 	const [media, setMedia] = useState('');
 	const navigation = useNavigation();
-	const [search, setSearch] = useState('');
 	const firebase = useContext(FirebaseContext);
+	const [isModalVisible, setIsModalVisible] = useState(false); // State to control modal visibility
+	const [search, setSearch] = useState('');
 
 	const handleSearch = async query => {
-		// Update the searchQuery state
 		setSearch(query.trim());
-
-		// Upadate state or make API calls here
 		try {
-			// Make a GET request to the Books-API using Axios
 			const response = await axios.get(
-				'https://books-api7.p.rapidapi.com/books/find/title',
+				'https://www.googleapis.com/books/v1/volumes',
 				{
 					params: {
-						title: query,
-					},
-					headers: {
-						'X-RapidAPI-Key': BOOK_API_KEY,
-						'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
+						q: query,
+						key: GOOGLE_BOOKS_API_KEY,
 					},
 				}
 			);
 
-			// Update the state with the search results
-			setSearchResults(response.data);
+			const items = response.data.items || [];
+			const searchResults = items.map(item => ({
+				title: item.volumeInfo.title,
+				authors: item.volumeInfo.authors
+					? item.volumeInfo.authors.join(', ')
+					: 'Unknown Author',
+				thumbnail: item.volumeInfo.imageLinks
+					? item.volumeInfo.imageLinks.thumbnail
+					: null,
+			}));
+			setSearchResults(searchResults);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
 	};
 
 	const handlePost = async () => {
-		// navigate to previous screen
 		navigation.goBack();
-
 		await firebase.addPostForCurrentUser(postText, mergedResults);
-
 		setPostText('');
 		setMedia('');
 		setSearch('');
@@ -79,9 +79,8 @@ export default function CreatePostScreen() {
 			});
 
 			if (!pickerResult.canceled) {
-				const selectedAsset = pickerResult.assets[0]; // Get the first selected asset
+				const selectedAsset = pickerResult.assets[0];
 				const mediaUri = selectedAsset.uri;
-				// Update state with the media URI
 				setMedia(mediaUri);
 			}
 		} catch (error) {
@@ -93,6 +92,14 @@ export default function CreatePostScreen() {
 		...(searchResults.map(result => ({ book: result.cover })) || []),
 		{ imageURL: media },
 	];
+
+	const openModal = () => {
+		setIsModalVisible(true);
+	};
+
+	const closeModal = () => {
+		setIsModalVisible(false);
+	};
 
 	return (
 		<View style={styles.container}>
@@ -119,9 +126,11 @@ export default function CreatePostScreen() {
 					<TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
 						<Ionicons name="image-outline" size={24} color="white" />
 					</TouchableOpacity>
-					<View style={styles.searchBar}>
-						<SearchBar onSearch={handleSearch} />
-					</View>
+					<TouchableOpacity onPress={openModal} style={styles.searchButton}>
+						{/* Button to open the modal */}
+						<Ionicons name="search" size={24} color="white" style={{}} />
+						<Text style={styles.searchButtonText}> Search for Books</Text>
+					</TouchableOpacity>
 				</View>
 				<ScrollView horizontal>
 					{mergedResults.map((item, index) => (
@@ -141,6 +150,12 @@ export default function CreatePostScreen() {
 					))}
 				</ScrollView>
 			</View>
+			{/* Modal for search */}
+			<SearchModal
+				visible={isModalVisible}
+				onClose={closeModal}
+				onSearch={handleSearch}
+			/>
 		</View>
 	);
 }
@@ -196,12 +211,22 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 10,
 	},
-	buttonText: {
-		color: 'white',
-		marginLeft: 10,
-	},
-	imageContainer: {
+	searchButton: {
+		position: 'absolute',
+		bottom: 0,
+		right: 0,
+		color: '#fff',
+		borderRadius: 20,
+		backgroundColor: '#E9446A',
+		paddingVertical: 10,
+		paddingHorizontal: 20,
 		flexDirection: 'row',
+		alignItems: 'center',
+		margin: 10,
+	},
+	searchButtonText: {
+		fontSize: 16,
+		color: '#fff',
 	},
 	mediaPreview: {
 		bottom: -10,
@@ -210,11 +235,5 @@ const styles = StyleSheet.create({
 		height: 200,
 		borderRadius: 10,
 		marginRight: 10,
-	},
-	searchBar: {
-		width: '80%',
-		position: 'absolute',
-		bottom: 0,
-		right: 0,
 	},
 });
