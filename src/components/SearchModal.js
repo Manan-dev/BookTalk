@@ -24,10 +24,10 @@ const SearchModal = ({ visible, onClose, onBookSelect }) => {
 					params: {
 						q: query.trim(),
 						key: GOOGLE_BOOKS_API_KEY,
+						maxResults: 9,
 					},
 				}
 			);
-
 			const items = response.data.items || [];
 			const results = items.map(item => ({
 				id: item.id,
@@ -62,7 +62,7 @@ const SearchModal = ({ visible, onClose, onBookSelect }) => {
 						<Text style={styles.closeButton}>Close</Text>
 					</TouchableOpacity>
 				</View>
-				<ScrollView>
+				<ScrollView contentContainerStyle={styles.book}>
 					{searchResults.map(book => (
 						<TouchableOpacity key={book.id} onPress={() => onBookSelect(book)}>
 							<View style={styles.bookItem}>
@@ -70,10 +70,6 @@ const SearchModal = ({ visible, onClose, onBookSelect }) => {
 									source={{ uri: book.thumbnail }}
 									style={styles.bookThumbnail}
 								/>
-								<View style={styles.bookInfo}>
-									<Text style={styles.bookTitle}>{book.title}</Text>
-									<Text style={styles.bookAuthors}>{book.authors}</Text>
-								</View>
 							</View>
 						</TouchableOpacity>
 					))}
@@ -115,11 +111,21 @@ const styles = StyleSheet.create({
 		color: '#E9446A',
 		marginLeft: 10,
 	},
+	book: {
+		display: 'flex',
+		flexWrap: 'wrap',
+		flexDirection: 'row',
+		gap: 10,
+	},
+	bookItem: {
+		width: 110,
+		height: 200,
+	},
 	bookThumbnail: {
-		width: 120,
+		width: 110,
 		height: 200,
 		borderRadius: 10,
-		marginRight: 10,
+		objectFit: 'fill',
 	},
 });
 
