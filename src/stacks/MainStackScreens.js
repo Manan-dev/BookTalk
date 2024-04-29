@@ -8,7 +8,9 @@ import HomeScreen from '../screens/HomeScreen';
 import MessageScreen from '../screens/MessageScreen';
 import SearchScreen from '../screens/SearchScreen';
 import SecondaryProfileScreen from '../screens/SecondaryProfileScreen';
-import ProfileStackNavigator from './ProfileStackNavigator';
+import ProfileScreen from '../screens/ProfileScreen';
+import BookDetailsScreen from '../screens/BookDetailsScreen';
+import AboutScreen from '../screens/AboutScreen';
 
 export default MainStackScreens = () => {
 	const MainStack = createBottomTabNavigator();
@@ -62,8 +64,8 @@ export default MainStackScreens = () => {
 				}}
 			/>
 			<MainStack.Screen
-				name="ProfileStack"
-				component={ProfileStackNavigator}
+				name="Profile"
+				component={ProfileScreen}
 				options={{
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="ios-person" color={color} size={size} />
@@ -75,6 +77,24 @@ export default MainStackScreens = () => {
 				component={SecondaryProfileScreen}
 				options={{ tabBarButton: () => null }}
 			/>
+
+			<MainStack.Screen
+				name="BookDetailsScreen"
+				component={BookDetailsScreen}
+				options={{ 
+					tabBarButton: () => null,
+					title: 'Book Details',
+				 }}
+			/>		
+
+			<MainStack.Screen
+				name="AboutScreen"
+				component={AboutScreen}
+				options={{ 
+					tabBarButton: () => null,
+					title: 'About',
+				}}
+			/>	
 		</MainStack.Navigator>
 	);
 };
