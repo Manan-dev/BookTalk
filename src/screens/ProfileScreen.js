@@ -2,11 +2,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useContext, useEffect, useState } from 'react';
+import SearchBar from '../components/SearchBar';
 
 import { BOOK_API_KEY } from '@env';
 import axios from 'axios';
 import {
-	FlatList,
 	Image,
 	Platform,
 	RefreshControl,
@@ -60,6 +60,7 @@ export default function ProfileScreen() {
 	};
 
 	const toggleModal = () => {
+		setSearchResults([]);
 		setModalVisible1(!isModalVisible1);
 	};
 
@@ -91,24 +92,27 @@ export default function ProfileScreen() {
 		// Update the searchQuery state
 		setSearchQuery(query.trim());
 
-		// Upadate state or make API calls here
+		// If the query is empty, fetch random books
+		if (!query.trim()) {
+			fetchRandomBooks();
+			return;
+		}
+
+		// Make API call to Google Books API
 		try {
-			// Make a GET request to the Books-API using Axios
 			const response = await axios.get(
-				'https://books-api7.p.rapidapi.com/books/find/title',
+				'https://www.googleapis.com/books/v1/volumes',
 				{
 					params: {
-						title: query,
-					},
-					headers: {
-						'X-RapidAPI-Key': BOOK_API_KEY,
-						'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
+						q: query,
+						key: BOOK_API_KEY,
+						maxResults: 6,
 					},
 				}
 			);
 
 			// Update the state with the search results
-			setSearchResults(response.data);
+			setSearchResults(response.data.items || []);
 		} catch (error) {
 			console.error('Error fetching data:', error);
 		}
@@ -340,17 +344,32 @@ export default function ProfileScreen() {
 				>
 					<View style={styles.modalContainer}>
 						<View style={styles.searchModal}>
-							{/* <SearchBar onSearch={handleSearch} /> */}
+							<SearchBar onSearch={handleSearch} />
 							{/* Display search recommendations in a grid */}
-							<FlatList
-								data={searchResults}
-								keyExtractor={item => item._id}
-								renderItem={({ item }) => (
-									<TouchableOpacity onPress={() => setModalVisible1(false)}>
-										<Image source={{ uri: item.cover }} style={styles.image} />
+							<ScrollView
+								contentContainerStyle={{
+									flex: 1,
+									flexDirection: 'row',
+									flexWrap: 'wrap',
+								}}
+							>
+								{searchResults.map(item => (
+									<TouchableOpacity
+										key={item.id}
+										onPress={() => {
+											setModalVisible1(false);
+											setSearchResults([]);
+										}}
+										style={{ width: '33.3%' }}
+									>
+										<Image
+											source={{ uri: item.volumeInfo.imageLinks?.thumbnail }}
+											style={styles.image}
+											resizeMode="contain"
+										/>
 									</TouchableOpacity>
-								)}
-							/>
+								))}
+							</ScrollView>
 							<TouchableOpacity
 								style={styles.closeModal}
 								onPress={() => setModalVisible1(false)}

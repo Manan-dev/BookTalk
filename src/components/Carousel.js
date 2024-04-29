@@ -30,7 +30,7 @@ const Carousel = ({
 		try {
 			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 			let responseData = [];
-	
+
 			for (const title of titles) {
 				const options = {
 					method: 'GET',
@@ -42,7 +42,7 @@ const Carousel = ({
 						key: BOOK_API_KEY,
 					},
 				};
-	
+
 				try {
 					const response = await axios.request(options);
 					responseData.push(response.data); // Accumulate responses
@@ -53,17 +53,16 @@ const Carousel = ({
 				// Add delay between requests
 				await delay(1000);
 			}
-	
+
 			setBooksByTitle(responseData); // Update state with all responses
 		} catch (error) {
 			console.error(error);
 			setBooksByTitle([]); // Update state in case of error
 		}
-
 	};
 
 	const handleBookPress = book => {
-		const { title, authors, imageLinks, description} = book.volumeInfo;
+		const { title, authors, imageLinks, description } = book.volumeInfo;
 		navigation.navigate('BookDetailsScreen', {
 			title,
 			authors,
@@ -71,27 +70,6 @@ const Carousel = ({
 			description,
 		});
 	};
-
-	const renderItem = ({ item }) => {
-		if (!item || !item.volumeInfo) {
-			return null;
-		}
-	
-		const book = item;
-	
-		return (
-			<View style={styles.item}>
-				<Book
-					title={book.volumeInfo.title || 'Unknown Title'}
-					author={book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown Author'}
-					description={book.volumeInfo.description || 'No description available'}
-					onPress={() => handleBookPress(book)}
-				/>
-			</View>
-		);
-	};
-		
-		
 
 	const handleModalButtonPress = () => {
 		toggleModal(); // Call the toggleModal function passed down from the parent component
@@ -120,7 +98,7 @@ const Carousel = ({
 			<Text h4 h4Style={{ fontSize: 20, marginBottom: 5 }}>
 				{carouselTitle}
 			</Text>
-	
+
 			{books === true && (
 				<>
 					<FlatList
@@ -138,7 +116,7 @@ const Carousel = ({
 				</>
 			)}
 		</View>
-	);	
+	);
 };
 
 export default Carousel;
