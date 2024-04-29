@@ -1,17 +1,22 @@
 import React, {useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity, Button, FlatList } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity, Button, FlatList } from 'react-native';
 import Modal from 'react-native-modal';
 import axios from 'axios';
 import {BOOK_API_KEY} from '@env';
 
+
 const BookDetailsScreen = ({ route }) => {
 	const navigation = useNavigation();
-	const { title, authors, imageLinks, description } = route.params;
+	const { title, authors, imageLinks, description, backScreen } = route.params;
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [booksByAuthor, setBooksByAuthor] = useState([]);
 	const [showFullReview, setShowFullReview] = useState(false);
+
+	const handleBackNavigation = () => {
+		navigation.navigate(backScreen);
+	};
 
 	const addClicked = () => {
 		setModalVisible(true);
@@ -60,17 +65,20 @@ const BookDetailsScreen = ({ route }) => {
 
 	const handleBookPress = book => {
 		const { title, authors, imageLinks, description} = book.volumeInfo;
+		const backScreen = "Profile";
 		navigation.navigate('BookDetailsScreen', {
 			title,
 			authors,
 			imageLinks,
 			description,
+			backScreen
 		});
 	};
 
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
 		return (
+
 			<View style={styles.dropdownContainer}>
 				<TouchableOpacity
 					style={styles.dropdownOption}
@@ -115,8 +123,15 @@ const BookDetailsScreen = ({ route }) => {
 
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
-			{/* Add share button to screen */}
-			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
+			<View style={styles.backButtonContainer}>
+				<TouchableOpacity onPress={handleBackNavigation}>
+					<Ionicons name="arrow-back" size={20} style={styles.icon} />
+				</TouchableOpacity>
+				<TouchableOpacity onPress={handleBackNavigation}>
+					<Text style={styles.backButton}>Back</Text>
+				</TouchableOpacity>
+			</View>
+			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 35}}>
 				<View>
 					<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>
 						{renderDropdownOptions()}
@@ -216,6 +231,21 @@ const styles = StyleSheet.create({
 		borderBottomLeftRadius: 8,
 		borderBottomRightRadius: 8,
 		marginRight: 10,
+	},
+	backButtonContainer: {
+		position: 'absolute',
+		top: 20,
+		left: 20,
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	backButton: {
+		fontSize: 16,
+		fontWeight: 'bold',
+		// color: 'blue',
+		marginLeft: 5,
+		
+		marginRight: 5,
 	},
 	detailsContainer: {
 		alignItems: 'center',

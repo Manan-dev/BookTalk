@@ -75,8 +75,9 @@ const SearchScreen = () => {
     }, []);
 
 	const handleBookPress = book => {
-		const { title, author, cover, plot, review, rating } = book;
-		navigation.navigate('BookDetailsScreen', { title, author, cover, plot, review, rating });
+		const { title, authors, imageLinks, description } = book.volumeInfo;
+        const backScreen = "Search"
+		navigation.navigate('BookDetailsScreen', { title, authors, imageLinks, description, backScreen });
 	};
 
     // Render the SearchScreen component
