@@ -1,13 +1,25 @@
 // BookComponent.js
 import React from 'react';
-import { Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { Image, StyleSheet, TouchableOpacity, Text } from 'react-native';
 
 const BookComponent = ({ book, onPress }) => {
-	return (
-		<TouchableOpacity style={styles.container} onPress={() => onPress(book)}>
-			<Image source={{ uri: book.cover }} style={styles.coverImage} />
-		</TouchableOpacity>
-	);
+	// Check if book is defined
+    if (!book || !book.volumeInfo) {
+        // Handle case where book or volumeInfo is undefined
+        return null; // Or you can return a placeholder component
+    }
+
+    // Access volumeInfo from the book object
+    const { title, authors, description, imageLinks } = book.volumeInfo;
+
+    // Check if imageLinks and medium image is available, if not use a default image
+    const coverImageUri = imageLinks && imageLinks.thumbnail ? imageLinks.thumbnail : 'https://via.placeholder.com/150';
+
+    return (
+        <TouchableOpacity style={styles.container} onPress={() => onPress(book)}>
+            <Image source={{ uri: coverImageUri }} style={styles.coverImage} />
+        </TouchableOpacity>
+    );
 };
 
 const styles = StyleSheet.create({

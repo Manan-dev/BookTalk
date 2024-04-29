@@ -14,7 +14,7 @@ import {
 } from 'react-native';
 import Carousel from '../components/Carousel';
 import { FirebaseContext } from '../context/FirebaseContext';
-import booksReadData from '../data/booksReadCopy.json';
+import booksReadData from '../data/booksRead.json';
 
 const SecondaryProfileScreen = ({ route }) => {
 	const { user } = route.params;

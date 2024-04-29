@@ -30,52 +30,68 @@ const Carousel = ({
 		try {
 			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 			let responseData = [];
-
+	
 			for (const title of titles) {
 				const options = {
 					method: 'GET',
-					url: 'https://books-api7.p.rapidapi.com/books/find/title',
-					params: { title },
-					headers: {
-						'X-RapidAPI-Key': BOOK_API_KEY,
-						'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
+					url: 'https://www.googleapis.com/books/v1/volumes',
+					params: {
+						q: `intitle:${title}`, // Search by title
+						maxResults: 1, // Limit to 1 result per query
+						printType: 'books',
+						key: BOOK_API_KEY,
 					},
 				};
-
+	
 				try {
 					const response = await axios.request(options);
 					responseData.push(response.data); // Accumulate responses
 				} catch (error) {
-					console.error(error);
+					console.error(error.response.data.error.message);
 				}
-			}
 
+				// Add delay between requests
+				await delay(1000);
+			}
+	
 			setBooksByTitle(responseData); // Update state with all responses
 		} catch (error) {
 			console.error(error);
 			setBooksByTitle([]); // Update state in case of error
 		}
+
 	};
 
 	const handleBookPress = book => {
-		const { title, author, cover, plot, review, rating } = book;
+		const { title, authors, imageLinks, description} = book.volumeInfo;
 		navigation.navigate('BookDetailsScreen', {
 			title,
-			author,
-			cover,
-			plot,
-			review,
-			rating,
+			authors,
+			imageLinks,
+			description,
 		});
 	};
 
-	const renderItem = ({ item }) => (
-		<View style={styles.item}>
-			{item.map((book, index) => (
-				<Book key={index} book={book} onPress={() => handleBookPress(book)} />
-			))}
-		</View>
-	);
+	const renderItem = ({ item }) => {
+		if (!item || !item.volumeInfo) {
+			return null;
+		}
+	
+		const book = item;
+	
+		return (
+			<View style={styles.item}>
+				<Book
+					title={book.volumeInfo.title || 'Unknown Title'}
+					author={book.volumeInfo.authors ? book.volumeInfo.authors.join(', ') : 'Unknown Author'}
+					description={book.volumeInfo.description || 'No description available'}
+					onPress={() => handleBookPress(book)}
+				/>
+			</View>
+		);
+	};
+		
+		
 
 	const handleModalButtonPress = () => {
 		toggleModal(); // Call the toggleModal function passed down from the parent component
@@ -104,12 +120,16 @@ const Carousel = ({
 			<Text h4 h4Style={{ fontSize: 20, marginBottom: 5 }}>
 				{carouselTitle}
 			</Text>
-
+	
 			{books === true && (
 				<>
 					<FlatList
 						data={showMore ? booksByTitle : booksByTitle.slice(0, 5)}
-						renderItem={renderItem}
+						renderItem={({ item }) => (
+							<View style={styles.item}>
+								<Book book={item.items[0]} onPress={handleBookPress} />
+							</View>
+						)}
 						keyExtractor={(item, index) => index.toString()}
 						horizontal
 						showsHorizontalScrollIndicator={false}
@@ -118,7 +138,7 @@ const Carousel = ({
 				</>
 			)}
 		</View>
-	);
+	);	
 };
 
 export default Carousel;

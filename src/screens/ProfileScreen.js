@@ -21,10 +21,9 @@ import {
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-navigation';
 import Carousel from '../components/Carousel';
-import SearchBar from '../components/SearchBar';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
-import booksReadData from '../data/booksReadCopy.json';
+import booksReadData from '../data/booksRead.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
 
@@ -46,7 +45,6 @@ export default function ProfileScreen() {
 	const [showMore0, setShowMore0] = useState(false);
 	const [showMore1, setShowMore1] = useState(false);
 	const [showMore2, setShowMore2] = useState(false);
-	const [showMore3, setShowMore3] = useState(false);
 
 	useEffect(() => {
 		// Fetch follower and following counts
@@ -307,6 +305,16 @@ export default function ProfileScreen() {
 					<Carousel
 						carouselData={booksReadTitles}
 						carouselTitle="Books Read"
+						showMore={showMore0}
+						toggleShowMore={() => setShowMore0(!showMore0)}
+						toggleModal={toggleModal}
+						posts={false}
+						titles={true}
+						isMyProfile={true}
+					/>
+					<Carousel
+						carouselData={futureBooksTitles}
+						carouselTitle="To Be Read"
 						showMore={showMore1}
 						toggleShowMore={() => setShowMore1(!showMore1)}
 						toggleModal={toggleModal}
@@ -314,8 +322,6 @@ export default function ProfileScreen() {
 						titles={true}
 						isMyProfile={true}
 					/>
-				</View>
-				<View>
 					<Carousel
 						carouselData={mysteryBooksTitles}
 						carouselTitle="Favorite Mystery Books"
@@ -327,25 +333,14 @@ export default function ProfileScreen() {
 						isMyProfile={true}
 					/>
 				</View>
-				<View>
-					<Carousel
-						carouselData={futureBooksTitles}
-						carouselTitle="To Be Read"
-						showMore={showMore3}
-						toggleShowMore={() => setShowMore3(!showMore3)}
-						toggleModal={toggleModal}
-						posts={false}
-						titles={true}
-						isMyProfile={true}
-					/>
-				</View>
+
 				<Modal
 					isVisible={isModalVisible1}
 					onBackdropPress={() => setModalVisible1(true)}
 				>
 					<View style={styles.modalContainer}>
 						<View style={styles.searchModal}>
-							<SearchBar onSearch={handleSearch} />
+							{/* <SearchBar onSearch={handleSearch} /> */}
 							{/* Display search recommendations in a grid */}
 							<FlatList
 								data={searchResults}
