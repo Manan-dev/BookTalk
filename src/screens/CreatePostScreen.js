@@ -1,7 +1,5 @@
-import { BOOK_API_KEY } from '@env';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import axios from 'axios';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useContext, useState } from 'react';
 import {
@@ -13,54 +11,30 @@ import {
 	TouchableOpacity,
 	View,
 } from 'react-native';
-import SearchBar from '../components/SearchBar';
+import SearchModal from '../components/SearchModal'; // Import the SearchModal component
 import { FirebaseContext } from '../context/FirebaseContext';
 
 export default function CreatePostScreen() {
-	const [searchResults, setSearchResults] = useState([]);
 	const [postText, setPostText] = useState('');
 	const [media, setMedia] = useState('');
+	const [selectedBook, setSelectedBook] = useState(null);
+	const [isModalVisible, setIsModalVisible] = useState(false);
 	const navigation = useNavigation();
-	const [search, setSearch] = useState('');
 	const firebase = useContext(FirebaseContext);
 
-	const handleSearch = async query => {
-		// Update the searchQuery state
-		setSearch(query.trim());
-
-		// Upadate state or make API calls here
-		try {
-			// Make a GET request to the Books-API using Axios
-			const response = await axios.get(
-				'https://books-api7.p.rapidapi.com/books/find/title',
-				{
-					params: {
-						title: query,
-					},
-					headers: {
-						'X-RapidAPI-Key': BOOK_API_KEY,
-						'X-RapidAPI-Host': 'books-api7.p.rapidapi.com',
-					},
-				}
-			);
-
-			// Update the state with the search results
-			setSearchResults(response.data);
-		} catch (error) {
-			console.error('Error fetching data:', error);
-		}
-	};
-
 	const handlePost = async () => {
-		// navigate to previous screen
 		navigation.goBack();
-
 		await firebase.addPostForCurrentUser(postText, mergedResults);
-
 		setPostText('');
 		setMedia('');
-		setSearch('');
-		setSearchResults([]);
+		setSelectedBook(null);
+	};
+
+	const handleCancel = () => {
+		navigation.goBack();
+		setPostText('');
+		setMedia('');
+		setSelectedBook(null);
 	};
 
 	const handleAddMedia = async () => {
@@ -79,9 +53,8 @@ export default function CreatePostScreen() {
 			});
 
 			if (!pickerResult.canceled) {
-				const selectedAsset = pickerResult.assets[0]; // Get the first selected asset
+				const selectedAsset = pickerResult.assets[0];
 				const mediaUri = selectedAsset.uri;
-				// Update state with the media URI
 				setMedia(mediaUri);
 			}
 		} catch (error) {
@@ -89,18 +62,28 @@ export default function CreatePostScreen() {
 		}
 	};
 
+	const handleBookSelect = book => {
+		setSelectedBook(book);
+		setIsModalVisible(false);
+	};
+
+	const openModal = () => {
+		setIsModalVisible(true);
+	};
+
+	const closeModal = () => {
+		setIsModalVisible(false);
+	};
+
 	const mergedResults = [
-		...(searchResults.map(result => ({ book: result.cover })) || []),
+		...(selectedBook ? [{ book: selectedBook.thumbnail }] : []),
 		{ imageURL: media },
 	];
 
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<TouchableOpacity
-					style={styles.headerButton}
-					onPress={() => navigation.goBack()}
-				>
+				<TouchableOpacity style={styles.headerButton} onPress={handleCancel}>
 					<Text style={styles.headerButtonText}>Cancel</Text>
 				</TouchableOpacity>
 				<TouchableOpacity style={styles.headerButton} onPress={handlePost}>
@@ -119,28 +102,36 @@ export default function CreatePostScreen() {
 					<TouchableOpacity style={styles.mediaButton} onPress={handleAddMedia}>
 						<Ionicons name="image-outline" size={24} color="white" />
 					</TouchableOpacity>
-					<View style={styles.searchBar}>
-						<SearchBar onSearch={handleSearch} />
-					</View>
+					<TouchableOpacity onPress={openModal} style={styles.searchButton}>
+						<Ionicons name="search" size={24} color="white" />
+						<Text style={styles.searchButtonText}> Search for Books</Text>
+					</TouchableOpacity>
 				</View>
 				<ScrollView horizontal>
-					{mergedResults.map((item, index) => (
-						<TouchableOpacity key={index} onPress={() => console.log(item)}>
-							{item.imageURL ? (
-								<Image
-									source={{ uri: item.imageURL }}
-									style={styles.mediaPreview}
-								/>
-							) : (
-								<Image
-									source={{ uri: item.book }}
-									style={styles.mediaPreview}
-								/>
-							)}
-						</TouchableOpacity>
-					))}
+					{mergedResults.map((item, index) => {
+						return (
+							<TouchableOpacity key={index} onPress={() => console.log(item)}>
+								{item.imageURL ? (
+									<Image
+										source={{ uri: item.imageURL }}
+										style={styles.mediaPreview}
+									/>
+								) : item.book ? (
+									<Image
+										source={{ uri: item.book }}
+										style={styles.mediaPreview}
+									/>
+								) : null}
+							</TouchableOpacity>
+						);
+					})}
 				</ScrollView>
 			</View>
+			<SearchModal
+				visible={isModalVisible}
+				onClose={closeModal}
+				onBookSelect={handleBookSelect}
+			/>
 		</View>
 	);
 }
@@ -196,12 +187,22 @@ const styles = StyleSheet.create({
 		bottom: 0,
 		left: 10,
 	},
-	buttonText: {
-		color: 'white',
-		marginLeft: 10,
-	},
-	imageContainer: {
+	searchButton: {
+		position: 'absolute',
+		bottom: 0,
+		right: 0,
+		color: '#fff',
+		borderRadius: 20,
+		backgroundColor: '#E9446A',
+		paddingVertical: 10,
+		paddingHorizontal: 20,
 		flexDirection: 'row',
+		alignItems: 'center',
+		margin: 10,
+	},
+	searchButtonText: {
+		fontSize: 16,
+		color: '#fff',
 	},
 	mediaPreview: {
 		bottom: -10,
@@ -210,11 +211,5 @@ const styles = StyleSheet.create({
 		height: 200,
 		borderRadius: 10,
 		marginRight: 10,
-	},
-	searchBar: {
-		width: '80%',
-		position: 'absolute',
-		bottom: 0,
-		right: 0,
 	},
 });
