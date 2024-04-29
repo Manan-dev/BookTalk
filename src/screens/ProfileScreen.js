@@ -315,37 +315,14 @@ export default function ProfileScreen() {
 						isMyProfile={true}
 					/>
 				</View>
-				<View>
-					<Carousel
-						carouselData={mysteryBooksTitles}
-						carouselTitle="Favorite Mystery Books"
-						showMore={showMore2}
-						toggleShowMore={() => setShowMore2(!showMore2)}
-						toggleModal={toggleModal}
-						posts={false}
-						titles={true}
-						isMyProfile={true}
-					/>
-				</View>
-				<View>
-					<Carousel
-						carouselData={futureBooksTitles}
-						carouselTitle="To Be Read"
-						showMore={showMore3}
-						toggleShowMore={() => setShowMore3(!showMore3)}
-						toggleModal={toggleModal}
-						posts={false}
-						titles={true}
-						isMyProfile={true}
-					/>
-				</View>
+				
 				<Modal
 					isVisible={isModalVisible1}
 					onBackdropPress={() => setModalVisible1(true)}
 				>
 					<View style={styles.modalContainer}>
 						<View style={styles.searchModal}>
-							<SearchBar onSearch={handleSearch} />
+							{/* <SearchBar onSearch={handleSearch} /> */}
 							{/* Display search recommendations in a grid */}
 							<FlatList
 								data={searchResults}

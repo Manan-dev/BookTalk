@@ -8,7 +8,7 @@ import {BOOK_API_KEY} from '@env';
 
 const BookDetailsScreen = ({ route }) => {
 	const navigation = useNavigation();
-	const { title, author, cover, plot, review, rating } = route.params;
+	const { title, authors, imageLinks, description } = route.params;
 	const [isModalVisible, setModalVisible] = useState(false);
 	const [booksByAuthor, setBooksByAuthor] = useState([]);
 	const [showFullReview, setShowFullReview] = useState(false);
@@ -26,26 +26,22 @@ const BookDetailsScreen = ({ route }) => {
 	};
 
 	useEffect(() => {
-       fetchBooksByAuthor(author);
-    }, [author]);
+       fetchBooksByAuthor(authors);
+    }, [authors]);
 
 	const fetchBooksByAuthor = async (author) => {
 		try {
-			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+			const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 			let responseData = [];
-			
+	
 			const options = {
 				method: 'GET',
-				url: 'https://books-api7.p.rapidapi.com/books/find/author',
+				url: 'https://www.googleapis.com/books/v1/volumes',
 				params: {
-					fname: author.first_name,
-					lname: author.last_name,
-					mname: author.middle_name // Include middle_name in the params if it exists
+					q: `inauthor:${author}`, // Search by author
+					maxResults: 3, // Limit to 3 results per query
+					key: BOOK_API_KEY, // Replace with your Google Books API key
 				},
-				headers: {
-					'X-RapidAPI-Key': BOOK_API_KEY,
-					'X-RapidAPI-Host': 'books-api7.p.rapidapi.com'
-				}
 			};
 	
 			try {
@@ -55,16 +51,24 @@ const BookDetailsScreen = ({ route }) => {
 				console.error(error);
 			}
 	
-			setBooksByAuthor(responseData[0].slice(0, 3)); // Update state with all responses
+			setBooksByAuthor(responseData[0].items); // Update state with all responses
 		} catch (error) {
 			console.error(error);
 			setBooksByAuthor([]); // Update state in case of error
 		}
-	};
+	};	
 
 	const handleBookPress = book => {
-		const { title, author, cover, plot, review, rating } = book;
-		navigation.navigate('BookDetailsScreen', { title, author, cover, plot, review, rating });
+		const { title, authors, imageLinks, description} = book;
+		navigation.navigate('BookDetailsScreen', {
+			title,
+			authors,
+			imageLinks,
+			// cover,
+			description,
+			// review,
+			// rating,
+		});
 	};
 
 	const renderDropdownOptions = () => {
@@ -112,37 +116,37 @@ const BookDetailsScreen = ({ route }) => {
         }
     };
 
-	const StarRating = ({ rating, style }) => {
-		// Function to round the rating to the nearest whole number
-		const roundedRating = Math.round(rating); // Round to the nearest whole number
+	// const StarRating = ({ rating, style }) => {
+	// 	// Function to round the rating to the nearest whole number
+	// 	const roundedRating = Math.round(rating); // Round to the nearest whole number
 
-		// Function to generate stars based on the rating
-		const renderStars = () => {
-		  const fullStars = roundedRating; // Number of full stars
-		  const emptyStars = 5 - fullStars; // Number of empty stars
+	// 	// Function to generate stars based on the rating
+	// 	const renderStars = () => {
+	// 	  const fullStars = roundedRating; // Number of full stars
+	// 	  const emptyStars = 5 - fullStars; // Number of empty stars
 	  
-		  // Array to store star components
-		  const stars = [];
+	// 	  // Array to store star components
+	// 	  const stars = [];
 	  
-		  // Adding full stars
-		  for (let i = 0; i < fullStars; i++) {
-			stars.push(<Text key={i} style={{ fontSize: 24, color: 'gold' }}>★</Text>);
-		  }
+	// 	  // Adding full stars
+	// 	  for (let i = 0; i < fullStars; i++) {
+	// 		stars.push(<Text key={i} style={{ fontSize: 24, color: 'gold' }}>★</Text>);
+	// 	  }
 	  
-		  // Adding empty stars
-		  for (let i = 0; i < emptyStars; i++) {
-			stars.push(<Text key={`empty-${i}`} style={{ fontSize: 24, color: 'gray' }}>☆</Text>);
-		  }
+	// 	  // Adding empty stars
+	// 	  for (let i = 0; i < emptyStars; i++) {
+	// 		stars.push(<Text key={`empty-${i}`} style={{ fontSize: 24, color: 'gray' }}>☆</Text>);
+	// 	  }
 	  
-		  return stars;
-		};
+	// 	  return stars;
+	// 	};
 	  
-		return (
-		  <View style={[{ flexDirection: 'row' }, style]}>
-			{renderStars()}
-		  </View>
-		);
-	};
+	// 	return (
+	// 	  <View style={[{ flexDirection: 'row' }, style]}>
+	// 		{renderStars()}
+	// 	  </View>
+	// 	);
+	// };
 	
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
@@ -162,29 +166,32 @@ const BookDetailsScreen = ({ route }) => {
         	</View>
 			<View style={styles.container}>
 				{/* Add background image */}
-				<ImageBackground source={{ uri: cover }} style={styles.backgroundImage} imageStyle={{opacity:0.7}}>
+				<ImageBackground source={{ uri: imageLinks.thumbnail }} style={styles.backgroundImage} imageStyle={{ opacity: 0.7 }}>
 					<View style={styles.imageContainer}>
-						<Image source={{ uri: cover }} style={styles.coverImage} />
+						{/* Add cover image */}
+						<Image source={{ uri: imageLinks.smallThumbnail }} style={styles.coverImage} />
 					</View>
 					<View style={styles.contentContainer}>
 						<View style={styles.detailsContainer}>
-							
+							{/* Add book details */}
+							{/* Example: <Text>Title: {title}</Text> */}
 						</View>
 					</View>
 				</ImageBackground>
 			</View>
 
+
 			{/* Add book details content */}
 			<View style={styles.detailsContainer}>
 				<Text style={styles.title}>{title}</Text>
-				<Text style={styles.author}>{`${author.first_name} ${author.last_name}`}</Text>
-				<StarRating rating={rating}></StarRating>
-			 	<Text style={styles.plot}>{plot}</Text>
+				<Text style={styles.author}>{`${authors[0]}`}</Text>
+				{/* <StarRating rating={rating}></StarRating> */}
+			 	<Text style={styles.plot}>{description}</Text>
 			</View>
 		
 			<View>
 				{/* Add reviews */}
-				{review && (
+				{/* {review && (
 				<View style={styles.reviewsContainer}>
 					<Text style={styles.reviewsSubheading}>Reviews</Text>
 					<View>
@@ -201,20 +208,21 @@ const BookDetailsScreen = ({ route }) => {
 						</View>
 					</View>
 				</View>
-				)}
+				)} */}
 			</View>
 
 			<Text style={styles.moreBooksSubheading}>More Books By This Author</Text>
-			<View style={{flex: 1, justifyContent: 'center', flexDirection: 'row'}}>
+			<View style={{ flex: 1, justifyContent: 'center', flexDirection: 'row' }}>
 				{/* Add more books by this author */}
 				{booksByAuthor.map((book, index) => (
 					<View key={index}>
 						<TouchableOpacity onPress={() => handleBookPress(book)}>
-							<Image source={{ uri: book.cover }} style={styles.moreBooksImage} />
+							<Image source={{ uri: book.volumeInfo.imageLinks.thumbnail }} style={styles.moreBooksImage} />
 						</TouchableOpacity>
 					</View>
-					))}
+				))}
 			</View>
+
 		</ScrollView>
 	);
 };
