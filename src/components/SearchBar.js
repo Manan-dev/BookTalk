@@ -6,11 +6,6 @@ const SearchBar = ({ onSearch }) => {
 	const [query, setQuery] = useState('');
 
 	const handleSeach = () => {
-		// Add the search logic here
-		// And pass the result back to the parent component
-
-		// This is just to test how search query works
-		console.log('Search Query:', query);
 		onSearch(query);
 	};
 
