@@ -54,41 +54,7 @@ const Carousel = ({
 				await delay(1000);
 			}
 	
-			// Output all responses
-			// console.log(responseData);
-
-			// Assuming responseData is an array of responses
-			// const firstResponse = responseData[0];
-			// if (firstResponse && firstResponse.items && firstResponse.items.length > 0) {
-			// 	const firstBook = firstResponse.items[0];
-			// 	const title = firstBook.volumeInfo.title;
-				// console.log(title); // This will log the title of the first book in the first response
-			// }
-
-
-			// // Extract individual books from responses
-			// const books = responseData.map(response => {
-			// 	if (response.items && response.items.length > 0) {
-			// 		return response.items[0]; // Extract first item from items array
-			// 	}
-			// 	return null;
-			// });
-	
-			// // Filter out null values (responses without items)
-			// const validBooks = books.filter(book => book !== null);
-	
-			// Set state or do further processing with validBooks
-			// setBooksByTitle(validBooks);
-			
-			responseData.forEach(response => {
-				if (response && response.items && response.items.length > 0) {
-					const firstBook = response.items[0];
-					console.log("title:", firstBook.volumeInfo.imageLinks);
-				}
-			});
-
 			setBooksByTitle(responseData); // Update state with all responses
-			console.log("responseData:", responseData)
 		} catch (error) {
 			console.error(error);
 			setBooksByTitle([]); // Update state in case of error
@@ -102,16 +68,13 @@ const Carousel = ({
 			title,
 			authors,
 			imageLinks,
-			// cover,
 			description,
-			// review,
-			// rating,
 		});
 	};
 
 	const renderItem = ({ item }) => {
 		if (!item || !item.volumeInfo) {
-			return null; // Or you can return a placeholder component
+			return null;
 		}
 	
 		const book = item;

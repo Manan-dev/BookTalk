@@ -314,6 +314,26 @@ export default function ProfileScreen() {
 						titles={true}
 						isMyProfile={true}
 					/>
+					<Carousel
+						carouselData={futureBooksTitles}
+						carouselTitle="To Be Read"
+						showMore={showMore1}
+						toggleShowMore={() => setShowMore1(!showMore1)}
+						toggleModal={toggleModal}
+						posts={false}
+						titles={true}
+						isMyProfile={true}
+					/>
+					<Carousel
+						carouselData={mysteryBooksTitles}
+						carouselTitle="Favorite Mystery Books"
+						showMore={showMore1}
+						toggleShowMore={() => setShowMore1(!showMore1)}
+						toggleModal={toggleModal}
+						posts={false}
+						titles={true}
+						isMyProfile={true}
+					/>
 				</View>
 				
 				<Modal
