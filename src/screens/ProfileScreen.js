@@ -21,10 +21,9 @@ import {
 import Modal from 'react-native-modal';
 import { SafeAreaView } from 'react-navigation';
 import Carousel from '../components/Carousel';
-import SearchBar from '../components/SearchBar';
 import { FirebaseContext } from '../context/FirebaseContext';
 import { UserContext } from '../context/UserContext';
-import booksReadData from '../data/booksReadCopy.json';
+import booksReadData from '../data/booksRead.json';
 import futureBooksData from '../data/futureBooks.json';
 import mysteryBooksData from '../data/mysteryBooks.json';
 
@@ -46,7 +45,6 @@ export default function ProfileScreen() {
 	const [showMore0, setShowMore0] = useState(false);
 	const [showMore1, setShowMore1] = useState(false);
 	const [showMore2, setShowMore2] = useState(false);
-	const [showMore3, setShowMore3] = useState(false);
 
 	useEffect(() => {
 		// Fetch follower and following counts
@@ -307,8 +305,8 @@ export default function ProfileScreen() {
 					<Carousel
 						carouselData={booksReadTitles}
 						carouselTitle="Books Read"
-						showMore={showMore1}
-						toggleShowMore={() => setShowMore1(!showMore1)}
+						showMore={showMore0}
+						toggleShowMore={() => setShowMore0(!showMore0)}
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
@@ -327,15 +325,15 @@ export default function ProfileScreen() {
 					<Carousel
 						carouselData={mysteryBooksTitles}
 						carouselTitle="Favorite Mystery Books"
-						showMore={showMore1}
-						toggleShowMore={() => setShowMore1(!showMore1)}
+						showMore={showMore2}
+						toggleShowMore={() => setShowMore2(!showMore2)}
 						toggleModal={toggleModal}
 						posts={false}
 						titles={true}
 						isMyProfile={true}
 					/>
 				</View>
-				
+
 				<Modal
 					isVisible={isModalVisible1}
 					onBackdropPress={() => setModalVisible1(true)}

@@ -1,9 +1,30 @@
 [
 	{
 		"id": "1",
-		"cover": "https://cdn.thestorygraph.com/urhm6a8v5j0xhy7bf4jt99ygrb40",
-		"title": "Pride and Prejudice",
-		"author": "Jane Austen",
-		"description": ""
+		"title": "The Last Battle"
+	},
+	{
+		"id": "2",
+		"title": "Pride and Prejudice"
+	},
+	{
+		"id": "3",
+		"title": "The Hunger Games"
+	},
+	{
+		"id": "4",
+		"title": "Happy Place"
+	},
+	{
+		"id": "5",
+		"title": "Where the Crawdads Sing"
+	},
+	{
+		"id": "6",
+		"title": "The Glass Castle"
+	},
+	{
+		"id": "7",
+		"title": "Atomic Habits"
 	}
 ]
