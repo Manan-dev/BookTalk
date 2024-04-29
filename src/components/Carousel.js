@@ -62,12 +62,14 @@ const Carousel = ({
 	};
 
 	const handleBookPress = book => {
-		const { title, authors, imageLinks, description } = book.volumeInfo;
+		const { title, authors, imageLinks, description} = book.volumeInfo;
+		const backScreen = "Profile"
 		navigation.navigate('BookDetailsScreen', {
 			title,
 			authors,
 			imageLinks,
 			description,
+			backScreen
 		});
 	};
 

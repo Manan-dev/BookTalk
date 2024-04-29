@@ -1,5 +1,7 @@
-import React from 'react';
-import { Linking, StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, Linking } from "react-native";
 
 export default function AboutScreen() {
 	// Define a function to open Gmail when the email address is pressed
@@ -11,8 +13,23 @@ export default function AboutScreen() {
 		Linking.openURL(gmailUrl);
 	};
 
-	return (
+	const navigation = useNavigation();
+
+	const handleBackNavigation = () => {
+		navigation.navigate("Profile");
+	};
+
+
+    return (
 		<View style={styles.container}>
+			<View style={styles.backButtonContainer}>
+				<TouchableOpacity onPress={handleBackNavigation}>
+					<Ionicons name="arrow-back" size={20} style={styles.icon} />
+				</TouchableOpacity>
+				<TouchableOpacity onPress={handleBackNavigation}>
+					<Text style={styles.backButton}>Back</Text>
+				</TouchableOpacity>
+			</View>
 			<Text style={styles.paragraph}>
 				This app is designed to provide an interactive platform to connect
 				readers. This app utilizes the following API:{' '}
@@ -67,10 +84,11 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFF',
 	},
 	paragraph: {
-		fontSize: 17,
-		lineHeight: 24,
-		marginBottom: 10,
-		textAlign: 'justify',
+	  fontSize: 17,
+	  lineHeight: 24,
+	  marginTop: 35,
+	  marginBottom: 10,
+	  textAlign: 'justify',
 	},
 	team: {
 		fontSize: 17,
@@ -92,5 +110,19 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		lineHeight: 17,
 		marginBottom: 7,
+    },
+	backButtonContainer: {
+		position: 'absolute',
+		top: 20,
+		left: 20,
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	backButton: {
+		fontSize: 16,
+		fontWeight: 'bold',
+		// color: 'blue',
+		marginLeft: 5,
+		marginRight: 5,
 	},
 });
