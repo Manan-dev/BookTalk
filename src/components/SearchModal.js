@@ -22,9 +22,9 @@ const SearchModal = ({ visible, onClose, onBookSelect }) => {
 				'https://www.googleapis.com/books/v1/volumes',
 				{
 					params: {
-						q: query.trim(),
+						q: query,
 						key: GOOGLE_BOOKS_API_KEY,
-						maxResults: 9,
+						maxResults: 12,
 					},
 				}
 			);
