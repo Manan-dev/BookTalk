@@ -59,15 +59,12 @@ const BookDetailsScreen = ({ route }) => {
 	};	
 
 	const handleBookPress = book => {
-		const { title, authors, imageLinks, description} = book;
+		const { title, authors, imageLinks, description} = book.volumeInfo;
 		navigation.navigate('BookDetailsScreen', {
 			title,
 			authors,
 			imageLinks,
-			// cover,
 			description,
-			// review,
-			// rating,
 		});
 	};
 
@@ -116,38 +113,6 @@ const BookDetailsScreen = ({ route }) => {
         }
     };
 
-	// const StarRating = ({ rating, style }) => {
-	// 	// Function to round the rating to the nearest whole number
-	// 	const roundedRating = Math.round(rating); // Round to the nearest whole number
-
-	// 	// Function to generate stars based on the rating
-	// 	const renderStars = () => {
-	// 	  const fullStars = roundedRating; // Number of full stars
-	// 	  const emptyStars = 5 - fullStars; // Number of empty stars
-	  
-	// 	  // Array to store star components
-	// 	  const stars = [];
-	  
-	// 	  // Adding full stars
-	// 	  for (let i = 0; i < fullStars; i++) {
-	// 		stars.push(<Text key={i} style={{ fontSize: 24, color: 'gold' }}>★</Text>);
-	// 	  }
-	  
-	// 	  // Adding empty stars
-	// 	  for (let i = 0; i < emptyStars; i++) {
-	// 		stars.push(<Text key={`empty-${i}`} style={{ fontSize: 24, color: 'gray' }}>☆</Text>);
-	// 	  }
-	  
-	// 	  return stars;
-	// 	};
-	  
-	// 	return (
-	// 	  <View style={[{ flexDirection: 'row' }, style]}>
-	// 		{renderStars()}
-	// 	  </View>
-	// 	);
-	// };
-	
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
 			{/* Add share button to screen */}
@@ -173,8 +138,6 @@ const BookDetailsScreen = ({ route }) => {
 					</View>
 					<View style={styles.contentContainer}>
 						<View style={styles.detailsContainer}>
-							{/* Add book details */}
-							{/* Example: <Text>Title: {title}</Text> */}
 						</View>
 					</View>
 				</ImageBackground>
@@ -185,30 +148,7 @@ const BookDetailsScreen = ({ route }) => {
 			<View style={styles.detailsContainer}>
 				<Text style={styles.title}>{title}</Text>
 				<Text style={styles.author}>{`${authors[0]}`}</Text>
-				{/* <StarRating rating={rating}></StarRating> */}
 			 	<Text style={styles.plot}>{description}</Text>
-			</View>
-		
-			<View>
-				{/* Add reviews */}
-				{/* {review && (
-				<View style={styles.reviewsContainer}>
-					<Text style={styles.reviewsSubheading}>Reviews</Text>
-					<View>
-						<View style={styles.reviewContainer}>
-							<Text style={styles.reviewName}>{review.name}</Text>
-							<Text style={styles.reviewBody}>
-								{showFullReview ? review.body : `${review.body.slice(0, review.body.length / 3)}...`}
-							</Text>
-							{!showFullReview ? (
-							<Button title="Show More" onPress={() => setShowFullReview(true)} />
-							) : (
-							<Button title="Show Less" onPress={() => setShowFullReview(false)} />
-							)}
-						</View>
-					</View>
-				</View>
-				)} */}
 			</View>
 
 			<Text style={styles.moreBooksSubheading}>More Books By This Author</Text>
@@ -217,7 +157,9 @@ const BookDetailsScreen = ({ route }) => {
 				{booksByAuthor.map((book, index) => (
 					<View key={index}>
 						<TouchableOpacity onPress={() => handleBookPress(book)}>
-							<Image source={{ uri: book.volumeInfo.imageLinks.thumbnail }} style={styles.moreBooksImage} />
+							{book.volumeInfo.imageLinks.thumbnail ? (
+								<Image source={{ uri: book.volumeInfo.imageLinks.thumbnail }} style={styles.moreBooksImage} />
+							) : <Text>undefined</Text>}
 						</TouchableOpacity>
 					</View>
 				))}
