@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
 		resizeMode: 'contain',
 	},
 	caption: {
-		marginVertical: 10,
+		marginVertical: 20,
 	},
 	profilePic: {
 		width: 50,
