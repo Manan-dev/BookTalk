@@ -117,7 +117,7 @@ const MessageScreen = ({ navigation }) => {
 						/>
 
 						<View style={styles.chatContent}>
-							<View style={{ borderWidth: 1, maxWidth: '80%' }}>
+							<View style={{ maxWidth: '80%' }}>
 								<Text style={styles.userName}>
 									{item.recipientData.username}
 								</Text>
