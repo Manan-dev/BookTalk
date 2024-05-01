@@ -3,8 +3,10 @@ import { useNavigation } from '@react-navigation/native';
 import { Text } from '@rneui/themed';
 import axios from 'axios';
 import { React, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, TouchableOpacity, View, LogBox } from 'react-native';
 import Book from './Book.js';
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();//Ignore all log notifications
 
 const Carousel = ({
 	carouselData,
@@ -47,7 +49,7 @@ const Carousel = ({
 					const response = await axios.request(options);
 					responseData.push(response.data); // Accumulate responses
 				} catch (error) {
-					console.error(error.response.data.error.message);
+					// console.error(error.response.data.error.message);
 				}
 
 				// Add delay between requests
@@ -56,7 +58,7 @@ const Carousel = ({
 
 			setBooksByTitle(responseData); // Update state with all responses
 		} catch (error) {
-			console.error(error);
+			// console.error(error);
 			setBooksByTitle([]); // Update state in case of error
 		}
 	};
