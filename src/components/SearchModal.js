@@ -17,12 +17,16 @@ const SearchModal = ({ visible, onClose, onBookSelect }) => {
 	const [searchResults, setSearchResults] = useState([]);
 
 	const handleSearch = async () => {
+		if (!query.trim()) {
+			setSearchResults([]);
+			return;
+		}
 		try {
 			const response = await axios.get(
 				'https://www.googleapis.com/books/v1/volumes',
 				{
 					params: {
-						q: query,
+						q: query.trim(),
 						key: GOOGLE_BOOKS_API_KEY,
 						maxResults: 12,
 					},
@@ -63,16 +67,20 @@ const SearchModal = ({ visible, onClose, onBookSelect }) => {
 					</TouchableOpacity>
 				</View>
 				<ScrollView contentContainerStyle={styles.book}>
-					{searchResults.map(book => (
-						<TouchableOpacity key={book.id} onPress={() => onBookSelect(book)}>
-							<View style={styles.bookItem}>
-								<Image
-									source={{ uri: book.thumbnail }}
-									style={styles.bookThumbnail}
-								/>
-							</View>
-						</TouchableOpacity>
-					))}
+					{searchResults &&
+						searchResults.map(book => (
+							<TouchableOpacity
+								key={book.id}
+								onPress={() => onBookSelect(book)}
+							>
+								<View style={styles.bookItem}>
+									<Image
+										source={{ uri: book.thumbnail }}
+										style={styles.bookThumbnail}
+									/>
+								</View>
+							</TouchableOpacity>
+						))}
 				</ScrollView>
 			</View>
 		</Modal>
