@@ -1,11 +1,19 @@
-import React, {useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { BOOK_API_KEY } from '@env';
 import { Ionicons } from '@expo/vector-icons';
-import { Image, StyleSheet, ImageBackground, Text, View, ScrollView, Share, TouchableOpacity, Button, FlatList } from 'react-native';
-import Modal from 'react-native-modal';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import {BOOK_API_KEY} from '@env';
-
+import React, { useEffect, useState } from 'react';
+import {
+	Image,
+	ImageBackground,
+	ScrollView,
+	Share,
+	StyleSheet,
+	Text,
+	TouchableOpacity,
+	View,
+} from 'react-native';
+import Modal from 'react-native-modal';
 
 const BookDetailsScreen = ({ route }) => {
 	const navigation = useNavigation();
@@ -31,14 +39,14 @@ const BookDetailsScreen = ({ route }) => {
 	};
 
 	useEffect(() => {
-       fetchBooksByAuthor(authors);
-    }, [authors]);
+		fetchBooksByAuthor(authors);
+	}, [authors]);
 
-	const fetchBooksByAuthor = async (author) => {
+	const fetchBooksByAuthor = async author => {
 		try {
-			const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+			const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
 			let responseData = [];
-	
+
 			const options = {
 				method: 'GET',
 				url: 'https://www.googleapis.com/books/v1/volumes',
@@ -48,37 +56,36 @@ const BookDetailsScreen = ({ route }) => {
 					key: BOOK_API_KEY, // Replace with your Google Books API key
 				},
 			};
-	
+
 			try {
 				const response = await axios.request(options);
 				responseData.push(response.data); // Accumulate responses
 			} catch (error) {
 				console.error(error);
 			}
-	
+
 			setBooksByAuthor(responseData[0].items); // Update state with all responses
 		} catch (error) {
 			console.error(error);
 			setBooksByAuthor([]); // Update state in case of error
 		}
-	};	
+	};
 
 	const handleBookPress = book => {
-		const { title, authors, imageLinks, description} = book.volumeInfo;
-		const backScreen = "Profile";
+		const { title, authors, imageLinks, description } = book.volumeInfo;
+		const backScreen = 'Profile';
 		navigation.navigate('BookDetailsScreen', {
 			title,
 			authors,
 			imageLinks,
 			description,
-			backScreen
+			backScreen,
 		});
 	};
 
 	const renderDropdownOptions = () => {
 		// Customize your dropdown options
 		return (
-
 			<View style={styles.dropdownContainer}>
 				<TouchableOpacity
 					style={styles.dropdownOption}
@@ -103,23 +110,23 @@ const BookDetailsScreen = ({ route }) => {
 	};
 
 	const onShare = async () => {
-        try {
-            const result = await Share.share({
-                message: `Check out this book: ${title}`,
-            });
-            if (result.action === Share.sharedAction) {
-                if (result.activityType) {
-                    // Shared with activity type of result.activityType
-                } else {
-                    // Shared
-                }
-            } else if (result.action === Share.dismissedAction) {
-                // Dismissed
-            }
-        } catch (error) {
-            alert(error.message);
-        }
-    };
+		try {
+			const result = await Share.share({
+				message: `Check out this book: ${title}`,
+			});
+			if (result.action === Share.sharedAction) {
+				if (result.activityType) {
+					// Shared with activity type of result.activityType
+				} else {
+					// Shared
+				}
+			} else if (result.action === Share.dismissedAction) {
+				// Dismissed
+			}
+		} catch (error) {
+			alert(error.message);
+		}
+	};
 
 	return (
 		<ScrollView contentContainerStyle={styles.container}>
@@ -131,39 +138,55 @@ const BookDetailsScreen = ({ route }) => {
 					<Text style={styles.backButton}>Back</Text>
 				</TouchableOpacity>
 			</View>
-			<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 35}}>
+			<View
+				style={{
+					flexDirection: 'row',
+					justifyContent: 'space-between',
+					alignItems: 'center',
+					marginTop: 50,
+					backgroundColor: '#eee',
+				}}
+			>
 				<View>
 					<Modal isVisible={isModalVisible} onBackdropPress={hideModal}>
 						{renderDropdownOptions()}
 					</Modal>
 				</View>
-				<TouchableOpacity style={{marginRight: 310}} onPress={() => addClicked()}>
+				<TouchableOpacity
+					style={{ marginRight: 310 }}
+					onPress={() => addClicked()}
+				>
 					<Text style={{ fontSize: 25, color: '#006ee6' }}>+</Text>
 				</TouchableOpacity>
-				<TouchableOpacity style={{marginRight: 10}} onPress={onShare}>
+				<TouchableOpacity style={{ marginRight: 10 }} onPress={onShare}>
 					<Ionicons name="ios-share" size={26} color="#007AFF" />
 				</TouchableOpacity>
-        	</View>
+			</View>
 			<View style={styles.container}>
 				{/* Add background image */}
-				<ImageBackground source={{ uri: imageLinks.thumbnail }} style={styles.backgroundImage} imageStyle={{ opacity: 0.7 }}>
+				<ImageBackground
+					source={{ uri: imageLinks.thumbnail }}
+					style={styles.backgroundImage}
+					imageStyle={{ opacity: 0.7 }}
+				>
 					<View style={styles.imageContainer}>
 						{/* Add cover image */}
-						<Image source={{ uri: imageLinks.smallThumbnail }} style={styles.coverImage} />
+						<Image
+							source={{ uri: imageLinks.smallThumbnail }}
+							style={styles.coverImage}
+						/>
 					</View>
 					<View style={styles.contentContainer}>
-						<View style={styles.detailsContainer}>
-						</View>
+						<View style={styles.detailsContainer}></View>
 					</View>
 				</ImageBackground>
 			</View>
-
 
 			{/* Add book details content */}
 			<View style={styles.detailsContainer}>
 				<Text style={styles.title}>{title}</Text>
 				<Text style={styles.author}>{`${authors[0]}`}</Text>
-			 	<Text style={styles.plot}>{description}</Text>
+				<Text style={styles.plot}>{description}</Text>
 			</View>
 
 			<Text style={styles.moreBooksSubheading}>More Books By This Author</Text>
@@ -172,22 +195,28 @@ const BookDetailsScreen = ({ route }) => {
 				{booksByAuthor.map((book, index) => (
 					<View key={index}>
 						<TouchableOpacity onPress={() => handleBookPress(book)}>
-							{book.volumeInfo.imageLinks.thumbnail ? (
-								<Image source={{ uri: book.volumeInfo.imageLinks.thumbnail }} style={styles.moreBooksImage} />
-							) : <Text>undefined</Text>}
+							{book.volumeInfo.imageLinks &&
+							book.volumeInfo.imageLinks.thumbnail ? (
+								<Image
+									source={{ uri: book.volumeInfo.imageLinks.thumbnail }}
+									style={styles.moreBooksImage}
+								/>
+							) : (
+								<Text>Thumbnail not available</Text>
+							)}
 						</TouchableOpacity>
 					</View>
 				))}
 			</View>
-
 		</ScrollView>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-        flexGrow: 1,
-    },
+		flexGrow: 1,
+		backgroundColor: '#fff',
+	},
 	modalContainer: {
 		flexGrow: 1,
 		backgroundColor: '#fff',
@@ -198,26 +227,26 @@ const styles = StyleSheet.create({
 		padding: 16,
 		borderRadius: 8,
 		alignSelf: 'flex-start',
-		marginBottom: 350
+		marginBottom: 350,
 	},
 	dropdownOption: {
 		paddingVertical: 8,
 		borderBottomWidth: 1,
 		borderBottomColor: '#ddd',
 	},
-    backgroundImage: {
-        flex: 1,
-        resizeMode: 'cover',
-    },
-    imageContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
+	backgroundImage: {
+		flex: 1,
+		resizeMode: 'cover',
+	},
+	imageContainer: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
 	coverImage: {
 		width: 200,
 		height: 300,
@@ -225,7 +254,7 @@ const styles = StyleSheet.create({
 	},
 	moreBooksImage: {
 		height: 180,
-		aspectRatio: 2/3,
+		aspectRatio: 2 / 3,
 		borderTopLeftRadius: 8,
 		borderTopRightRadius: 8,
 		borderBottomLeftRadius: 8,
@@ -244,7 +273,7 @@ const styles = StyleSheet.create({
 		fontWeight: 'bold',
 		// color: 'blue',
 		marginLeft: 5,
-		
+
 		marginRight: 5,
 	},
 	detailsContainer: {
@@ -293,7 +322,7 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 		marginRight: 10,
 		backgroundColor: '#dbdad7',
-		textAlign: 'justify'
+		textAlign: 'justify',
 	},
 	item: {
 		width: 115,
