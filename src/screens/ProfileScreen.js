@@ -487,5 +487,8 @@ const styles = StyleSheet.create({
 	updateBioButton: {
 		backgroundColor: 'rgb(32, 137, 220)',
 		padding: 10,
+		alignSelf: 'flex-end',
+		marginRight: 10,
+		borderRadius: 10,
 	},
 });
