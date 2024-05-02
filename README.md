@@ -2,9 +2,9 @@
 
 ## Authors
 
-- [Manan Patel](https://github.com/Manan-dev)
-- [Riya Patel](https://github.com/rpatel90)
-- [Tulsi Tailor](https://github.com/ttulsi01)
+- [Manan Patel](https://github.com/Manan-dev) - Team Lead / Developer
+- [Riya Patel](https://github.com/rpatel90) - Developer
+- [Tulsi Tailor](https://github.com/ttulsi01) - Developer
 
 ## Overview
 
@@ -13,7 +13,7 @@ BookTalk is a mobile application built with React Native and Expo, designed to p
 ## Features
 
 - **User Authentication**: Secure and user-friendly authentication system.
-- **Interactive Book Reviews**: Create engaging posts with ratings, comments, and multimedia elements.
+- **Interactive Book Reviews**: Create engaging posts with reviews, comments, and multimedia elements.
 - **Social Engagement**: Like, comment, share, and save posts to foster community engagement.
 - **User Connections**: Follow other users, build a network of followers, and make connections.
 - **Recommendations**: Get personalized book and group recommendations.
