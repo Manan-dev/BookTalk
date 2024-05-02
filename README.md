@@ -27,6 +27,10 @@ BookTalk is a mobile application built with React Native and Expo, designed to p
 - **Firebase Firestore**: Reliable and scalable database solution.
 - **API Integration**: Collaborating with various external APIs.
 
+## Final Product
+
+![poster](./assets/poster.png)
+
 ## Getting Started
 
 1. **Clone the Repository**:
